@@ -3,8 +3,11 @@
 module.exports = function (app) {
     const controller = require('../controler/category')   
     const controllerTour =require('../controler/tour')
+    const response = require('../response/response');
+    const controllerNotif =  require('../controler/notif');
     const controllerProvince =require('../controler/province')
     
+
     //welocome
     app.get('/',controller.welcome)
 
@@ -17,6 +20,9 @@ module.exports = function (app) {
     //tour
     app.get('/tour',controllerTour.getTour)
     app.get('/tour/:id',controllerTour.getTourId)
+
+    //delete notif
+    app.delete('/notif/:id', controllerNotif.deleteNotif);
     app.get('/tour/province/:id',controllerTour.getTourIdProvince)
     app.post('/tour',controllerTour.insert)
     app.patch('/tour/:id',controllerTour.update)
