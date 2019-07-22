@@ -5,6 +5,8 @@ module.exports = function (app) {
     const controllerTour =require('../controler/tour')
     const response = require('../response/response');
     const controllerNotif =  require('../controler/notif');
+    const controllerProvince =require('../controler/province')
+    
 
     //welocome
     app.get('/',controller.welcome)
@@ -19,10 +21,13 @@ module.exports = function (app) {
     app.get('/tour',controllerTour.getTour)
     app.get('/tour/:id',controllerTour.getTourId)
 
-    //Notif
-    app.get('/notif', function (req,res) {
-      response.notif("9a673309-2a53-4972-8194-03038cd82bb4","111",'ok jadi');
-    })
-
+    //delete notif
     app.delete('/notif/:id', controllerNotif.deleteNotif);
+    app.get('/tour/province/:id',controllerTour.getTourIdProvince)
+    app.post('/tour',controllerTour.insert)
+    app.patch('/tour/:id',controllerTour.update)
+    app.delete('/tour/:id',controllerTour.delete)
+
+    //province
+    app.get('/province',controllerProvince.getAllProvince)
 }
