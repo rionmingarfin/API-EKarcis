@@ -4,26 +4,28 @@ exports.success = (value,res) => {
       const data = {
           status :"success",
           data : value
-      }
+      };
+
       res.status(200);
       res.json(data);
       res.end();
 };
 
-exports.error = (data, code=400) => {
+exports.error = (data, res, code=400) => {
     const value= {
         status : "failed",
         data : data
-    }
+    };
+
     res.status(code);
     res.json(value);
     res.end();
-}
+};
 
 exports.notif = (device_id,id_user, message) => {
     const fetch = require('node-fetch');
     const connection = require('../database/connect');
-    var jsonBody =
+    let jsonBody =
         {
             app_id: "85aa6769-11fa-48f8-ac83-bbe3cc4a1889",
             include_player_ids: [device_id],
@@ -56,4 +58,4 @@ exports.notif = (device_id,id_user, message) => {
         return false;
     });
 
-}
+};
