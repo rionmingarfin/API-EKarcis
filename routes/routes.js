@@ -25,7 +25,6 @@ module.exports = function (app) {
     app.post('/auth_login', auth.login)
     app.post('/auth_register', auth.register)
     //tour
-    
     app.get('/tour',controllerTour.getTour)
     app.get('/tour/:id',controllerTour.getTourId)
     app.get('/tour/province/:id',controllerTour.getTourIdProvince)
