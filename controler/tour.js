@@ -43,7 +43,7 @@ exports.getTour = (req, res) => {
     var totalPage;
     connection.query(qountsql, function (error, rows, field) {
         if (error) {
-            response.error(404, 'data not found', res)
+            response.error('data not found',404)
         } else {
             totalCount = rows[0].totalCount;
             totalPage = Math.ceil(totalCount / limit);
@@ -56,7 +56,7 @@ exports.getTour = (req, res) => {
             res.status(404).json('error pokonya')
         } else {
             if (rows.length === 0 || rows.length === '') {
-                Response.error(404, 'data not found', res)
+                Response.error('data not found', res,404)
             } else {
                 res.json({
                     totalData: totalCount,
@@ -74,7 +74,7 @@ exports.getTour = (req, res) => {
 exports.getTourId = (req, res) => {
     let id = req.params.id;
     if (id === 0 || id === '') {
-        Response.error(404, 'error', res)
+        Response.error('error', res,404)
     } else {
         connection.query(
             `SELECT tour.id_tour AS id_tour,tour.tour AS tour,tour.addres AS addres,tour.description AS description,tour.latitude AS latitude,tour.longitude AS longitude,tour.cost AS cost, province.province AS province, tour.id_province AS id_province,category.id AS id_category,category.name AS name_category,photo.link AS photo
@@ -267,7 +267,7 @@ exports.delete = (req, res) => {
                     res.status(404).json('eror pokoknya')
                 } else {
                     if (rows.affectedRows === 0 || rows.affectedRows === '') {
-                        Response.error(404, 'error', res)
+                        Response.error('error', res,404)
                     } else {
                         let idResult = id
                         let data = {
@@ -288,7 +288,7 @@ exports.delete = (req, res) => {
 exports.getTourIdProvince = (req, res) => {
     let id = req.params.id;
     if (id === 0 || id === '') {
-        Response.error(404, 'error', res)
+        Response.error('error', res,404)
     } else {
         connection.query(
             `SELECT tour.id_tour AS id_tour,tour.tour AS tour,tour.addres AS addres,tour.description AS description,tour.latitude AS latitude,tour.longitude AS longitude,tour.cost AS cost, province.province AS province, tour.id_province AS id_province,category.id AS id_category,category.name AS name_category,photo.link AS photo
@@ -303,7 +303,7 @@ exports.getTourIdProvince = (req, res) => {
                     res.status(400).json('eror')
                 } else {
                     if (rows.length === 0 || rows.length === '') {
-                        Response.error(404, 'data not found', res);
+                        Response.error('data not found', res,404);
                     } else {
                         res.status(200).json(rows);
                     }
@@ -320,7 +320,7 @@ exports.deletFoto = (req, res) => {
         if (rows.affectedRows >= 1) {
             response.success("Delete photo success", res);
         } else {
-            response.error("Delete photo failed", res);
+            response.error("Delete photo failed", res,404);
         }
     })
 }
