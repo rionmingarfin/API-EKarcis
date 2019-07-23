@@ -1,6 +1,10 @@
-'use strich'
+'use strict'
 
 module.exports = function (app) {
+
+	const controller = require('../controler/category')
+	const auth = require('../controler/auth')
+
     const controller = require('../controler/category')   
     const controllerTour =require('../controler/tour')
     const response = require('../response/response');
@@ -18,7 +22,11 @@ module.exports = function (app) {
     app.post('/category',controller.insert)
     app.patch('/category/:id',controller.update)
     app.delete('/category/:id',controller.delete)
-
+  
+    // Auth
+    app.post('/auth_login', auth.login)
+    app.post('/auth_register', auth.register)
+=======
     //tour
     
     app.get('/tour',controllerTour.getTour)
