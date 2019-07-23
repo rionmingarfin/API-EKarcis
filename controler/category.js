@@ -3,7 +3,7 @@ const Response = require('../response/response')
 const connection =require('../database/connect')
 const isEmpty =require ('lodash.isempty')
 exports.welcome = (req,res) =>{
-    Response.ok('welcome',res)
+    Response.success('welcome',res)
 }
 
 exports.getAllCategory = (req,res)=> {

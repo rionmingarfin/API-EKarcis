@@ -1,10 +1,10 @@
+require('./config')
 const express = require('express')
 const app = express()
 const bodyParser =require('body-parser')
 // const port =process.env.PORT || 5000
 const Routes = require('./routes/routes')
 const cors =require('cors')
-const env =require('./config')
 const dateFormat = require('dateformat');
 app.use(cors());
 
@@ -22,6 +22,6 @@ app.use(
 Routes(app)
 app.use(bodyParser.json())
 
-app.listen(env.PORT)
-console.log(`hello word${env.PORT}`)
+app.listen(process.env.PORT)
+console.log(`hello word${process.env.PORT}`)
 
