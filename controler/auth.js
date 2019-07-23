@@ -76,7 +76,7 @@ exports.register = (req, res) => {
 	} else {
 		let hash = md5(password)
 		connection.query(
-			'INSERT INTO users SET email=?, password=?, name=?, phone="0", birthday="1970-01-01", gender=?, points="0", token="0"',
+			'INSERT INTO users SET email=?, password=?, name=?, phone="0", address="", birthday="1970-01-01", gender=?, work="", photo="", points="0", token="0", json_access=""',
 			[email, hash, name, gender],
 			function (err, rows, field) {
 				if (err) {
