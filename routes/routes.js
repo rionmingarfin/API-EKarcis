@@ -10,7 +10,6 @@ module.exports = function (app) {
     const controllerProvince =require('../controler/province')
     const multer = require('multer');
     const upload = multer();
-    
 
     //welocome
     app.get('/',controller.welcome)
@@ -31,7 +30,6 @@ module.exports = function (app) {
     app.post('/tour',upload.any(),controllerTour.insert)
     app.patch('/tour/:id',controllerTour.update)
     app.delete('/tour/:id',controllerTour.delete)
-
 
     //delete notif
     app.delete('/notif/:id', controllerNotif.deleteNotif);
