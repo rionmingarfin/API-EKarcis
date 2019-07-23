@@ -2,9 +2,7 @@
 
 module.exports = function (app) {
 
-	const controller = require('../controler/category')
-	const auth = require('../controler/auth')
-
+    const auth = require('../controler/auth')
     const controller = require('../controler/category')   
     const controllerTour =require('../controler/tour')
     const response = require('../response/response');
@@ -26,7 +24,6 @@ module.exports = function (app) {
     // Auth
     app.post('/auth_login', auth.login)
     app.post('/auth_register', auth.register)
-=======
     //tour
     
     app.get('/tour',controllerTour.getTour)
