@@ -20,14 +20,22 @@ module.exports = function (app) {
     //tour
     app.get('/tour',controllerTour.getTour)
     app.get('/tour/:id',controllerTour.getTourId)
-
-    //delete notif
-    app.delete('/notif/:id', controllerNotif.deleteNotif);
     app.get('/tour/province/:id',controllerTour.getTourIdProvince)
     app.post('/tour',controllerTour.insert)
     app.patch('/tour/:id',controllerTour.update)
     app.delete('/tour/:id',controllerTour.delete)
 
+
+    //delete notif
+    app.delete('/notif/:id', controllerNotif.deleteNotif);
+
     //province
     app.get('/province',controllerProvince.getAllProvince)
+
+    //Photo
+    const multer = require('multer');
+    const upload = multer();
+    app.post('/tour/uploadphoto/:id_tour',upload.any(), controllerTour.uploadFoto);
+    app.delete('/tour/deletephoto/:id', controllerTour.deletFoto);
+
 }

@@ -1,7 +1,10 @@
 'use strict'
+
 const Response = require('../response/response')
 const connection = require('../database/connect')
 const isEmpty = require('lodash.isempty')
+const AWS = require('aws-sdk');
+const response = require("../response/response");
 exports.welcome = (req, res) => {
     Response.ok('welcome', res)
 }
@@ -59,6 +62,7 @@ exports.getTour = (req, res) => {
         }
     })
 }
+
 exports.getTourId = (req, res) => {
     let id = req.params.id;
     if (id === 0 || id === '') {
@@ -260,4 +264,55 @@ exports.getTourIdProvince = (req, res) => {
             }
         )
     }
+}
+
+exports.uploadFoto = (req, res) =>{
+
+    const s3 = new AWS.S3({
+        accessKeyId:process.env.AWSAccessKeyId,
+        secretAccessKey:process.env.AWSSecretKey
+    })
+    let file = req.files[0];
+    let id_tour = req.params.id_tour;
+
+    const  params = {
+        Bucket: 'e-tiketing',
+        Key:`${new Date().getTime()}-${file.originalname}`,
+        Body:req.files[0].buffer,
+        ACL: 'public-read',
+        ContentType: file.mimetype
+    };
+    s3.upload(params, function (err, data) {
+        if (err){
+            response.error("Upload photo failed" ,res);
+        }
+       let val = {
+           location: data.Location,
+           id_tour : id_tour,
+           message:'Upload photo success'
+       };
+
+        let sql = `INSERT INTO ekarcis.photo (id_tour, link) VALUES ('${id_tour}','${data.Location}')`;
+        connection.query(sql, function (error, rows, field) {
+            if (rows.affectedRows>=1){
+                response.success( val,res);
+            }else{
+                response.error("Upload photo failed" ,res);
+            }
+        });
+        
+        
+    })
+}
+
+exports.deletFoto = (req, res)=>{
+    let sql = `DELETE FROM photo WHERE id=${req.params.id}`;
+
+    connection.query(sql, function (error, rows, field) {
+        if (rows.affectedRows>=1){
+            response.success("Delete photo success", res);
+        }else {
+            response.error("Delete photo failed", res);
+        }
+    })
 }
