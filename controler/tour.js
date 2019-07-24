@@ -30,14 +30,15 @@ exports.getTour = (req, res) => {
     LEFT JOIN category ON tour.id_category=category.id 
     LEFT JOIN province ON tour.id_province = province.id
     LEFT JOIN photo ON tour.id_tour = photo.id_tour`
-
-    if (!isEmpty(req.query.search)) {
+     
+    let search = req.query.search
+    if (!isEmpty(search)) {
         let search = req.query.search;
         sql += ` WHERE tour LIKE '%${search}%'`;
         qountsql += ` WHERE tour LIKE '%${search}%'`;
     }
-
-    if (!isEmpty(req.query.sort)) {
+    let sort =req.query.sort
+    if (!isEmpty(sort)) {
         let sort = req.query.sort;
         sql += ` ORDER BY tour ${sort}`;
     }
@@ -51,19 +52,8 @@ exports.getTour = (req, res) => {
 
     var totalCount;
     var totalPage;
-    connection.query(qountsql, function (error, rows, field) {
-        if (error) {
-            res.json({
-                status: 200,
-                data: []
-            })
-        } else {
-            totalCount = rows[0].totalCount;
-            totalPage = Math.ceil(totalCount / limit);
-        }
-    }
-    )
-    let regisKey = 'paket:rows'
+
+    let regisKey = `paket:rows:${sort}:${search}:${start}:${limit}:${startpage}`
     return client.get(regisKey, (err, rows) => {
         if (rows) {
             res.send({
@@ -72,31 +62,78 @@ exports.getTour = (req, res) => {
             console.log('data', rows)
             // client.del(regisKey)
         } else {
-            connection.query(sql, function (error, rows, field) {
+            connection.query(qountsql, function (error, rows, field) {
                 if (error) {
-                    res.status(404).json('error pokonya')
+                    res.json({
+                        status: 200,
+                        data: []
+                    })
                 } else {
-                    if (rows.length === 0 || rows.length === '') {
-                        res.json({
-                            status: 200,
-                            data: []
-                        })
-                    } else {
-                        let data = client.setex(regisKey, 3600, JSON.stringify(rows))
-                        console.log('setex', data)
-                        res.json({
-                            totalData: totalCount,
-                            totalPage: totalPage,
-                            limit: limit,
-                            page: start,
-                            status: 200,
-                            data: rows
-                        })
-                    }
+                    totalCount = rows[0].totalCount;
+                    totalPage = Math.ceil(totalCount / limit);
+                    connection.query(sql, function (error, rows, field) {
+                        if (error) {
+                            res.status(404).json('error pokonya')
+                        } else {
+                            if (rows.length === 0 || rows.length === '') {
+                                res.json({
+                                    status: 200,
+                                    data: []
+                                })
+                            } else {
+                                let data = client.setex(regisKey, 3600, JSON.stringify(rows))
+                                console.log('setex', data)
+                                res.json({
+                                    totalData: totalCount,
+                                    totalPage: totalPage,
+                                    limit: limit,
+                                    page: start,
+                                    status: 200,
+                                    data: rows
+                                })
+                            }
+                        }
+                    })
                 }
-            })
+            }
+            )
         }
     })
+    // let regisKey = 'paket:rows'
+    // return client.get(regisKey, (err, rows) => {
+    //     if (rows) {
+    //         res.send({
+    //             data: JSON.parse(rows)
+    //         })
+    //         console.log('data', rows)
+    //         // client.del(regisKey)
+    //     } else {
+    //         connection.query(sql, function (error, rows, field) {
+    //             if (error) {
+    //                 res.status(404).json('error pokonya')
+    //             } else {
+    //                 if (rows.length === 0 || rows.length === '') {
+    //                     res.json({
+    //                         status: 200,
+    //                         data: []
+    //                     })
+    //                 } else {
+    //                     let data = client.setex(regisKey, 3600, JSON.stringify(rows))
+    //                     console.log('setex', data)
+    //                     res.json({
+    //                         totalData: totalCount,
+    //                         totalPage: totalPage,
+    //                         limit: limit,
+    //                         page: start,
+    //                         status: 200,
+    //                         data: rows
+    //                     })
+    //                         .send();
+    //                 }
+    //             }
+    //         })
+    //     }
+    // })
 }
 
 exports.getTourId = (req, res) => {
