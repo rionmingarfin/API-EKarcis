@@ -10,8 +10,16 @@ exports.welcome = (req, res) => {
 }
 
 exports.getTour = (req, res) => {
-    var sql = `SELECT tour.id_tour AS id_tour,tour.tour AS tour,tour.addres AS addres,tour.description AS description,tour.latitude AS latitude,tour.longitude AS longitude,tour.cost AS cost, province.province AS province, tour.id_province AS id_province,category.id AS id_category,category.name AS name_category FROM tour JOIN category ON tour.id_category=category.id JOIN province ON tour.id_province = province.id`;
-    var qountsql = `SELECT COUNT(*) AS totalCount FROM tour JOIN category ON tour.id_category=category.id JOIN province ON tour.id_province = province.id`
+    var sql = `SELECT tour.id_tour AS id_tour,tour.tour AS tour,tour.addres AS addres,tour.description AS description,tour.latitude AS latitude,tour.longitude AS longitude,tour.cost AS cost, province.province AS province, tour.id_province AS id_province,category.id AS id_category,category.name AS name_category,photo.link AS photo
+    FROM tour 
+    JOIN category ON tour.id_category=category.id 
+    JOIN province ON tour.id_province = province.id
+    JOIN photo ON tour.id_tour = photo.id_tour`;
+    var qountsql = `SELECT COUNT(*) AS totalCount 
+    FROM tour 
+    JOIN category ON tour.id_category=category.id 
+    JOIN province ON tour.id_province = province.id
+    JOIN photo ON tour.id_tour = photo.id_tour`
 
     if (!isEmpty(req.query.search)) {
         let search = req.query.search;
@@ -35,7 +43,10 @@ exports.getTour = (req, res) => {
     var totalPage;
     connection.query(qountsql, function (error, rows, field) {
         if (error) {
-            response.error(404, 'data not found', res)
+            res.json({
+                status : 200,
+                data : []
+            })
         } else {
             totalCount = rows[0].totalCount;
             totalPage = Math.ceil(totalCount / limit);
@@ -48,7 +59,10 @@ exports.getTour = (req, res) => {
             res.status(404).json('error pokonya')
         } else {
             if (rows.length === 0 || rows.length === '') {
-                Response.error(404, 'data not found', res)
+                res.json({
+                    status : 200,
+                    data : []
+                })
             } else {
                 res.json({
                     totalData: totalCount,
@@ -66,17 +80,22 @@ exports.getTour = (req, res) => {
 exports.getTourId = (req, res) => {
     let id = req.params.id;
     if (id === 0 || id === '') {
-        Response.error(404, 'error', res)
+        Response.error('error', res,404)
     } else {
         connection.query(
-            `SELECT tour.id_tour AS id_tour,tour.tour AS tour,tour.addres AS addres,tour.description AS description,tour.latitude AS latitude,tour.longitude AS longitude,tour.cost AS cost, province.province AS province, tour.id_province AS id_province,category.id AS id_category,category.name AS name FROM tour JOIN category ON tour.id_category=category.id JOIN province ON tour.id_province = province.id WHERE tour.id_tour=?`,
+            `SELECT tour.id_tour AS id_tour,tour.tour AS tour,tour.addres AS addres,tour.description AS description,tour.latitude AS latitude,tour.longitude AS longitude,tour.cost AS cost, province.province AS province, tour.id_province AS id_province,category.id AS id_category,category.name AS name_category,photo.link AS photo
+            FROM tour 
+            JOIN category ON tour.id_category=category.id 
+            JOIN province ON tour.id_province = province.id
+            JOIN photo ON tour.id_tour = photo.id_tour
+            WHERE tour.id_tour=?`,
             [id],
             function (error, rows, field) {
                 if (error) {
                     res.status(400).json('eror')
                 } else {
                     if (rows.length === 0 || rows.length === '') {
-                        Response.error(404, 'data not found', res);
+                        Response.error('data not found', res,404);
                     } else {
                         res.status(200).json(rows);
                     }
@@ -87,9 +106,22 @@ exports.getTourId = (req, res) => {
 }
 
 exports.insert = (req, res) => {
+    const s3 = new AWS.S3({
+        accessKeyId: process.env.AWSAccessKeyId,
+        secretAccessKey: process.env.AWSSecretKey
+    })
+    let file = req.files[0];
+    const params = {
+        Bucket: 'e-tiketing',
+        Key: `${new Date().getTime()}-${file.originalname}`,
+        Body: req.files[0].buffer,
+        ACL: 'public-read',
+        ContentType: file.mimetype
+    };
+    let id_admin =req.body.id_admin
     let tour = req.body.tour;
     let addres = req.body.addres;
-    let description =req.body.description;
+    let description = req.body.description;
     let latitude = req.body.latitude;
     let longitude = req.body.longitude;
     let cost = req.body.cost;
@@ -97,53 +129,71 @@ exports.insert = (req, res) => {
     let id_category = req.body.id_category;
 
     connection.query(
-        'INSERT INTO tour SET tour=?,addres=?,description=?,latitude=?,longitude=?,cost=?,id_province=?,id_category=?',
-        [tour, addres,description,latitude, longitude, cost, id_province, id_category],
+        'INSERT INTO tour SET id_admin=?,tour=?,addres=?,description=?,latitude=?,longitude=?,cost=?,id_province=?,id_category=?',
+        [id_admin,tour, addres, description, latitude, longitude, cost, id_province, id_category],
         function (error, rows, field) {
             if (error) {
                 res.status(400).json('eror')
             } else {
-                connection.query(
-                    'SELECT province.province FROM province WHERE province.id=?',
-                    [id_province],
-                    function (error, rowsProvince, field) {
+                s3.upload(params, function (err, data) {
+                    if (err) {
+                        response.error("Upload photo failed", res);
+                    }
+                    let idInsert = rows.insertId
+                    let sql =`INSERT INTO ekarcis.photo (id_tour,id_user, link) VALUES ('${idInsert}','','${data.Location}')`;
+                    console.log(sql)
+                    connection.query(
+                        sql,
+                        function (error, rows, field) {
+                            console.log(rows)
                         if (error) {
-                            res.status(400).json('eror')
+                            response.error("gagal kampret", res);
                         } else {
                             connection.query(
-                                'SELECT category.name FROM category WHERE category.id=?',
-                                [id_category],
-                                function (error, rowsCategory, field) {
+                                'SELECT province.province FROM province WHERE province.id=?',
+                                [id_province],
+                                function (error, rowsProvince, field) {
                                     if (error) {
-                                        res.status(404).json('error')
+                                        res.status(400).json('eror')
                                     } else {
-                                        let resultId = rows.insertId
-                                        let category = rowsCategory
-                                        let province = rowsProvince
-                                        let data = {
-                                            status: 201,
-                                            message: "data sucesfully",
-                                            result: {
-                                                id: resultId,
-                                                tour: tour,
-                                                addres: addres,
-                                                description :description,
-                                                latitude: latitude,
-                                                longitude: longitude,
-                                                cost: cost,
-                                                id_province: id_province,
-                                                id_category: id_category,
-                                                category_name: category[0].name,
-                                                province: province[0].province
+                                        connection.query(
+                                            'SELECT category.name FROM category WHERE category.id=?',
+                                            [id_category],
+                                            function (error, rowsCategory, field) {
+                                                if (error) {
+                                                    res.status(404).json('error')
+                                                } else {
+                                                    let resultId = rows.insertId
+                                                    let category = rowsCategory
+                                                    let province = rowsProvince
+                                                    let data = {
+                                                        status: 201,
+                                                        message: "data sucesfully",
+                                                        result: {
+                                                            id: resultId,
+                                                            id_admin : id_admin,
+                                                            tour: tour,
+                                                            addres: addres,
+                                                            description: description,
+                                                            latitude: latitude,
+                                                            longitude: longitude,
+                                                            cost: cost,
+                                                            id_province: id_province,
+                                                            id_category: id_category,
+                                                            category_name: category[0].name,
+                                                            province: province[0].province
+                                                        }
+                                                    }
+                                                    return res.status(202).json(data).end();
+                                                }
                                             }
-                                        }
-                                        return res.status(202).json(data).end();
+                                        )
                                     }
                                 }
                             )
                         }
-                    }
-                )
+                    });
+                })
             }
         }
     )
@@ -162,7 +212,7 @@ exports.update = (req, res) => {
 
     connection.query(
         'UPDATE tour SET tour=?,addres=?,description=?,latitude=?,longitude=?,cost=?,id_province=?,id_category=? WHERE id_tour=?',
-        [tour, addres,description, latitude, longitude, cost, id_province, id_category, id],
+        [tour, addres, description, latitude, longitude, cost, id_province, id_category, id],
         function (error, rows, field) {
             if (error) {
                 res.status(400).json('eror pokonya')
@@ -225,7 +275,7 @@ exports.delete = (req, res) => {
                     res.status(404).json('eror pokoknya')
                 } else {
                     if (rows.affectedRows === 0 || rows.affectedRows === '') {
-                        Response.error(404, 'error', res)
+                        Response.error('error', res,404)
                     } else {
                         let idResult = id
                         let data = {
@@ -246,17 +296,52 @@ exports.delete = (req, res) => {
 exports.getTourIdProvince = (req, res) => {
     let id = req.params.id;
     if (id === 0 || id === '') {
-        Response.error(404, 'error', res)
+        Response.error('error', res,404)
     } else {
         connection.query(
-            `SELECT tour.id_tour AS id_tour,tour.tour AS tour,tour.addres AS addres,tour.description AS description,tour.latitude AS latitude,tour.longitude AS longitude,tour.cost AS cost, province.province AS province, tour.id_province AS id_province,category.id AS id_category,category.name AS name FROM tour JOIN category ON tour.id_category=category.id JOIN province ON tour.id_province = province.id WHERE tour.id_province=?`,
+            `SELECT tour.id_tour AS id_tour,tour.tour AS tour,tour.addres AS addres,tour.description AS description,tour.latitude AS latitude,tour.longitude AS longitude,tour.cost AS cost, province.province AS province, tour.id_province AS id_province,category.id AS id_category,category.name AS name_category,photo.link AS photo
+            FROM tour 
+            JOIN category ON tour.id_category=category.id 
+            JOIN province ON tour.id_province = province.id
+            JOIN photo ON tour.id_tour = photo.id_tour 
+            WHERE tour.id_province=?`,
             [id],
             function (error, rows, field) {
                 if (error) {
                     res.status(400).json('eror')
                 } else {
                     if (rows.length === 0 || rows.length === '') {
-                        Response.error(404, 'data not found', res);
+                        Response.error('data not found', res,404);
+                    } else {
+                        res.status(200).json(rows);
+                    }
+                }
+            }
+        )
+    }
+}
+exports.getTourIdadmin = (req, res) => {
+    let id = req.params.id;
+    if (id === 0 || id === '') {
+        Response.error('error', res,404)
+    } else {
+        connection.query(
+            `SELECT tour.id_tour AS id_tour,tour.tour AS tour,tour.addres AS addres,tour.description AS description,tour.latitude AS latitude,tour.longitude AS longitude,tour.cost AS cost, province.province AS province, tour.id_province AS id_province,category.id AS id_category,category.name AS name_category,photo.link AS photo
+            FROM tour 
+            JOIN category ON tour.id_category=category.id 
+            JOIN province ON tour.id_province = province.id
+            JOIN photo ON tour.id_tour = photo.id_tour 
+            WHERE tour.id_admin=?`,
+            [id],
+            function (error, rows, field) {
+                if (error) {
+                    res.status(400).json('eror')
+                } else {
+                    if (rows.length === 0 || rows.length === '') {
+                        res.json({
+                            status : 200,
+                            data : []
+                        })
                     } else {
                         res.status(200).json(rows);
                     }
@@ -266,53 +351,14 @@ exports.getTourIdProvince = (req, res) => {
     }
 }
 
-exports.uploadFoto = (req, res) =>{
-
-    const s3 = new AWS.S3({
-        accessKeyId:process.env.AWSAccessKeyId,
-        secretAccessKey:process.env.AWSSecretKey
-    })
-    let file = req.files[0];
-    let id_tour = req.params.id_tour;
-
-    const  params = {
-        Bucket: 'e-tiketing',
-        Key:`${new Date().getTime()}-${file.originalname}`,
-        Body:req.files[0].buffer,
-        ACL: 'public-read',
-        ContentType: file.mimetype
-    };
-    s3.upload(params, function (err, data) {
-        if (err){
-            response.error("Upload photo failed" ,res);
-        }
-       let val = {
-           location: data.Location,
-           id_tour : id_tour,
-           message:'Upload photo success'
-       };
-
-        let sql = `INSERT INTO ekarcis.photo (id_tour, link) VALUES ('${id_tour}','${data.Location}')`;
-        connection.query(sql, function (error, rows, field) {
-            if (rows.affectedRows>=1){
-                response.success( val,res);
-            }else{
-                response.error("Upload photo failed" ,res);
-            }
-        });
-        
-        
-    })
-}
-
-exports.deletFoto = (req, res)=>{
+exports.deletFoto = (req, res) => {
     let sql = `DELETE FROM photo WHERE id=${req.params.id}`;
 
     connection.query(sql, function (error, rows, field) {
-        if (rows.affectedRows>=1){
+        if (rows.affectedRows >= 1) {
             response.success("Delete photo success", res);
-        }else {
-            response.error("Delete photo failed", res);
+        } else {
+            response.error("Delete photo failed", res,404);
         }
     })
 }

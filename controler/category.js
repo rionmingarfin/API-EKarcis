@@ -2,6 +2,10 @@
 const Response = require('../response/response')
 const connection =require('../database/connect')
 const isEmpty =require ('lodash.isempty')
+// const redis =require('redis')
+// const request =require('superagent')
+// const client =redis.createClient()
+
 exports.welcome = (req,res) =>{
     Response.success('welcome',res)
 }
