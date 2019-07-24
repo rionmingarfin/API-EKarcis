@@ -50,4 +50,3 @@ module.exports = function (app) {
     //Ticket
     app.get('/ticket', controllerTicket.getTicket);
 };
-}
