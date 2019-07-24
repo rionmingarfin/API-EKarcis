@@ -1,5 +1,6 @@
 const connection = require('../database/connect')
 const isEmpty = require('lodash.isempty')
+const Response = require('../response/response')
 
 exports.wishlist = (req, res) => {
     const id_user = req.query.id_user;
@@ -63,6 +64,32 @@ exports.wishlist = (req, res) => {
                                 }
                             }
                         )
+                    }
+                }
+            }
+        )
+    }
+}
+
+exports.getIdUser = (req, res) => {
+    let id = req.params.id;
+    if (id === 0 || id === '') {
+        Response.error('error', res, 404)
+    } else {
+        connection.query(
+            `SELECT * FROM wishlist WHERE wishlist.id_user=?`,
+            [id],
+            function (error, rows, field) {
+                if (error) {
+                    res.status(400).json('eror')
+                } else {
+                    if (rows.length === 0 || rows.length === '') {
+                        res.json({
+                            status: 200,
+                            data: []
+                        })
+                    } else {
+                        res.status(200).json(rows);
                     }
                 }
             }
