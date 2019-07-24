@@ -1,12 +1,13 @@
 'use strich'
 
 module.exports = function (app) {
-    const controller = require('../controler/category')   
-    const controllerTour =require('../controler/tour')
+    const controller = require('../controler/category');
+    const controllerTour =require('../controler/tour');
     const response = require('../response/response');
     const controllerNotif =  require('../controler/notif');
-    const controllerProvince =require('../controler/province')
-    const controllerTransaction =require('../controler/transaction')
+    const controllerProvince =require('../controler/province');
+    const controllerTransaction =require('../controler/transaction');
+    const controllerTicket =require('../controler/ticket');
 
 
     //welocome
@@ -41,4 +42,7 @@ module.exports = function (app) {
     //Transaction
     app.post('/transaction', controllerTransaction.postTransaction);
     app.post('/gettransaction', controllerTransaction.getTransaction);
+
+    //Ticket
+    app.get('/ticket', controllerTicket.getTicket);
 };

@@ -12,34 +12,35 @@ exports.postTransaction = async (req, res) => {
     let name = req.body.name;
     let id_tour = req.body.id_tour;
     let ticket_amount = req.body.ticket_amount;
-    let booking_date = req.body.booking_date;
-    let coin = req.body.coin;
+    let booking_date = moment(req.body.booking_date).utc().format("YYYY-MM-DD HH:mm:ss");
+    let coin = req.body.coins_bonus;
     let date = Date.now();
     let total_price = req.body.total_price;
     let payment_method = req.body.payment_method;
     let numberId = `E-KARCIS-${moment(new Date()).format('MM')}-${new Date().getTime()}`;
     let paymentGateway = 'https://my.ipaymu.com/api/getbniva';
-    let va = '';
-    let displayName = '';
-    let payment_id = '';
-
-    await axios.post(paymentGateway, {
-        key: process.env.IPAYMUapi_key,
-        price: 200,
-        uniqid: numberId,
-        notify_url: 'http://websiteanda.com/notify.php'
-    })
-        .then(response => {
-            payment_id = response.data.id;
-            va = response.data.va;
-            displayName = response.data.displayName;
-        })
-        .catch(error => {
-            response.error("GET VA failed", res)
-        });
+    let va = '1234567890';
+    let displayName = '12';
+    let payment_id = '12';
+    console.log(req.body);
+    // await axios.post(paymentGateway, {
+    //     key: process.env.IPAYMUapi_key,
+    //     price: 200,
+    //     uniqid: numberId,
+    //     notify_url: 'http://websiteanda.com/notify.php'
+    // })
+    //     .then(response => {
+    //         payment_id = response.data.id;
+    //         va = response.data.va;
+    //         displayName = response.data.displayName;
+    //     })
+    //     .catch(error => {
+    //         response.error("GET VA failed", res)
+    //     });
 
     let sql = `INSERT INTO ekarcis.transaction (id_transaction, id_user,name, id_tour, ticket_amount, coins_bonus, booking_date, deadline, payment_method,total_price,payment_id, va, payment_display_name, status) 
     VALUES ('${numberId}', '${id_user}','${name}', '${id_tour}', '${ticket_amount}', '${coin}', '${booking_date}', '${moment(date).add(2, 'days').utc().format("YYYY-MM-DD HH:mm:ss")}','${payment_method}','${total_price}','${payment_id}','${va}','${displayName}', 'unpaid')`;
+    console.log(sql);
     connection.query(sql, function (error, field) {
         if (error) {
             response.error("send transaction failed", res)
@@ -58,6 +59,7 @@ exports.postTransaction = async (req, res) => {
 exports.getTransaction = (req, res, next) => {
     let id_user = req.body.id_user;
     let id_tour = req.body.id_tour;
+
     let sql = "select * from users where id_user = " + id_user;
     connection.query(sql, function (error, users) {
         if (error) {

@@ -6,7 +6,9 @@ const bodyParser =require('body-parser')
 const Routes = require('./routes/routes')
 const cors =require('cors')
 const dateFormat = require('dateformat');
-app.use(cors());
+const logger =  require('morgan');
+
+app.use(cors(), logger('dev'));
 
 app.use(
     bodyParser.urlencoded({
@@ -19,9 +21,8 @@ app.use(
 
     },
 )
-Routes(app)
 app.use(bodyParser.json())
-
+Routes(app)
 app.listen(process.env.PORT)
 console.log(`hello word${process.env.PORT}`)
 
