@@ -28,6 +28,7 @@ module.exports = function (app) {
     app.get('/tour',controllerTour.getTour)
     app.get('/tour/:id',controllerTour.getTourId)
     app.get('/tour/province/:id',controllerTour.getTourIdProvince)
+    app.get('/tour/admin/:id',controllerTour.getTourIdadmin)
     app.post('/tour',upload.any(),controllerTour.insert)
     app.patch('/tour/:id',controllerTour.update)
     app.delete('/tour/:id',controllerTour.delete)

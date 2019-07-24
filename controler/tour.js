@@ -118,6 +118,7 @@ exports.insert = (req, res) => {
         ACL: 'public-read',
         ContentType: file.mimetype
     };
+    let id_admin =req.body.id_admin
     let tour = req.body.tour;
     let addres = req.body.addres;
     let description = req.body.description;
@@ -128,8 +129,8 @@ exports.insert = (req, res) => {
     let id_category = req.body.id_category;
 
     connection.query(
-        'INSERT INTO tour SET tour=?,addres=?,description=?,latitude=?,longitude=?,cost=?,id_province=?,id_category=?',
-        [tour, addres, description, latitude, longitude, cost, id_province, id_category],
+        'INSERT INTO tour SET id_admin=?,tour=?,addres=?,description=?,latitude=?,longitude=?,cost=?,id_province=?,id_category=?',
+        [id_admin,tour, addres, description, latitude, longitude, cost, id_province, id_category],
         function (error, rows, field) {
             if (error) {
                 res.status(400).json('eror')
@@ -170,6 +171,7 @@ exports.insert = (req, res) => {
                                                         message: "data sucesfully",
                                                         result: {
                                                             id: resultId,
+                                                            id_admin : id_admin,
                                                             tour: tour,
                                                             addres: addres,
                                                             description: description,
@@ -310,6 +312,36 @@ exports.getTourIdProvince = (req, res) => {
                 } else {
                     if (rows.length === 0 || rows.length === '') {
                         Response.error('data not found', res,404);
+                    } else {
+                        res.status(200).json(rows);
+                    }
+                }
+            }
+        )
+    }
+}
+exports.getTourIdadmin = (req, res) => {
+    let id = req.params.id;
+    if (id === 0 || id === '') {
+        Response.error('error', res,404)
+    } else {
+        connection.query(
+            `SELECT tour.id_tour AS id_tour,tour.tour AS tour,tour.addres AS addres,tour.description AS description,tour.latitude AS latitude,tour.longitude AS longitude,tour.cost AS cost, province.province AS province, tour.id_province AS id_province,category.id AS id_category,category.name AS name_category,photo.link AS photo
+            FROM tour 
+            JOIN category ON tour.id_category=category.id 
+            JOIN province ON tour.id_province = province.id
+            JOIN photo ON tour.id_tour = photo.id_tour 
+            WHERE tour.id_admin=?`,
+            [id],
+            function (error, rows, field) {
+                if (error) {
+                    res.status(400).json('eror')
+                } else {
+                    if (rows.length === 0 || rows.length === '') {
+                        res.json({
+                            status : 200,
+                            data : []
+                        })
                     } else {
                         res.status(200).json(rows);
                     }
