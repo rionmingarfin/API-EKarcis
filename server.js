@@ -19,8 +19,9 @@ app.use(
 
     },
 )
-Routes(app)
 app.use(bodyParser.json())
+
+Routes(app)
 
 app.listen(process.env.PORT)
 console.log(`hello word${process.env.PORT}`)
