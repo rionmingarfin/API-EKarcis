@@ -8,7 +8,9 @@ const helmet = require('helmet')
 const Routes = require('./routes/routes')
 const cors =require('cors')
 const dateFormat = require('dateformat');
-app.use(cors());
+const logger =  require('morgan');
+
+app.use(cors(), logger('dev'));
 
 app.use(
     bodyParser.urlencoded({
@@ -25,7 +27,6 @@ app.use(bodyParser.json())
 app.use(xssFilter())
 app.use(helmet.xssFilter())
 Routes(app) 
-
 app.listen(process.env.PORT)
 console.log(`hello word${process.env.PORT}`)
 
