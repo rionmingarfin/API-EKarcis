@@ -5,7 +5,6 @@ exports.success = (value,res) => {
           status :"success",
           data : value
       };
-
       res.status(200);
       res.json(data);
       res.end();

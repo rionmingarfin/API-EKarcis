@@ -6,7 +6,8 @@ module.exports = function (app) {
     const response = require('../response/response');
     const controllerNotif =  require('../controler/notif');
     const controllerProvince =require('../controler/province')
-    
+    const controllerTransaction =require('../controler/transaction')
+
 
     //welocome
     app.get('/',controller.welcome)
@@ -25,7 +26,6 @@ module.exports = function (app) {
     app.patch('/tour/:id',controllerTour.update)
     app.delete('/tour/:id',controllerTour.delete)
 
-
     //delete notif
     app.delete('/notif/:id', controllerNotif.deleteNotif);
 
@@ -38,4 +38,7 @@ module.exports = function (app) {
     app.post('/tour/uploadphoto/:id_tour',upload.any(), controllerTour.uploadFoto);
     app.delete('/tour/deletephoto/:id', controllerTour.deletFoto);
 
-}
+    //Transaction
+    app.post('/transaction', controllerTransaction.postTransaction);
+    app.post('/gettransaction', controllerTransaction.getTransaction);
+};
