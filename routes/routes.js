@@ -6,9 +6,9 @@ module.exports = function (app) {
     const auth = require('../controler/auth')
     const controller = require('../controler/category')   
     const controllerTour =require('../controler/tour')
-    const response = require('../response/response');
     const controllerNotif =  require('../controler/notif');
     const controllerProvince =require('../controler/province')
+    const controlerWishlist = require('../controler/wishlist')
     const multer = require('multer');
     const upload = multer();
 
@@ -53,4 +53,7 @@ module.exports = function (app) {
 
     //Ticket
     app.get('/ticket', controllerTicket.getTicket);
+
+    //wisihlist
+    app.post('/wishlist',controlerWishlist.wishlist)
 };
