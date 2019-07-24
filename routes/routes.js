@@ -56,4 +56,5 @@ module.exports = function (app) {
 
     //wisihlist
     app.post('/wishlist',controlerWishlist.wishlist)
+    app.get('/wishlist/:id',controlerWishlist.getIdUser)
 };
