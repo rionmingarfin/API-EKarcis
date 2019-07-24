@@ -23,6 +23,7 @@ module.exports = function (app) {
     // Auth
     app.post('/auth_login', auth.login)
     app.post('/auth_register', auth.register)
+    app.patch('/auth_register/:id',upload.any(), auth.update)
     //tour
     app.get('/tour',controllerTour.getTour)
     app.get('/tour/:id',controllerTour.getTourId)
