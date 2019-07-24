@@ -43,7 +43,10 @@ exports.getTour = (req, res) => {
     var totalPage;
     connection.query(qountsql, function (error, rows, field) {
         if (error) {
-            response.error('data not found',404)
+            res.json({
+                status : 200,
+                data : []
+            })
         } else {
             totalCount = rows[0].totalCount;
             totalPage = Math.ceil(totalCount / limit);
@@ -56,7 +59,10 @@ exports.getTour = (req, res) => {
             res.status(404).json('error pokonya')
         } else {
             if (rows.length === 0 || rows.length === '') {
-                Response.error('data not found', res,404)
+                res.json({
+                    status : 200,
+                    data : []
+                })
             } else {
                 res.json({
                     totalData: totalCount,
