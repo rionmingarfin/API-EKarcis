@@ -1,7 +1,8 @@
 'use strict'
 
 module.exports = function (app) {
-
+    const controllerTransaction =require('../controler/transaction');
+    const controllerTicket =require('../controler/ticket');
     const auth = require('../controler/auth')
     const controller = require('../controler/category')   
     const controllerTour =require('../controler/tour')
@@ -42,4 +43,11 @@ module.exports = function (app) {
     // Photo
     app.delete('/tour/deletephoto/:id', controllerTour.deletFoto);
 
+    //Transaction
+    app.post('/transaction', controllerTransaction.postTransaction);
+    app.post('/gettransaction', controllerTransaction.getTransaction);
+
+    //Ticket
+    app.get('/ticket', controllerTicket.getTicket);
+};
 }
