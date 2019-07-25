@@ -61,6 +61,8 @@ module.exports = function (app) {
     app.get('/checkin', controllerTicket.checkIn);
   
     //wisihlist
-    app.post('/wishlist',controlerWishlist.wishlist);
-    app.get('/wishlist/:id',controlerWishlist.getIdUser);
+    app.post('/wishlist',controlerWishlist.wishlist)
+    app.get('/wishlist',controlerWishlist.getWishlist)
+    app.get('/wishlist/:id',controlerWishlist.getIdUser)
+
 };
