@@ -6,9 +6,9 @@ module.exports = function (app) {
     const auth = require('../controler/auth')
     const controller = require('../controler/category')   
     const controllerTour =require('../controler/tour')
-    const response = require('../response/response');
     const controllerNotif =  require('../controler/notif');
     const controllerProvince =require('../controler/province')
+    const controlerWishlist = require('../controler/wishlist')
     const multer = require('multer');
     const upload = multer();
 
@@ -24,6 +24,10 @@ module.exports = function (app) {
     // Auth
     app.post('/auth_login', auth.login)
     app.post('/auth_register', auth.register)
+    app.post('/auth_forgot', auth.forgot)
+    app.post('/auth_token_check/:id', auth.tokenCheck)
+    app.post('/auth_password/:id', auth.password)
+
     app.patch('/auth_register/:id',upload.any(), auth.update)
     //tour
     app.get('/tour',controllerTour.getTour)
@@ -53,5 +57,8 @@ module.exports = function (app) {
     app.get('/ticket', controllerTicket.getTicket);
     app.post('/ticket', controllerTicket.createTicket);
     app.get('/checkin', controllerTicket.checkIn);
+  
+    //wisihlist
+    app.post('/wishlist',controlerWishlist.wishlist)
+    app.get('/wishlist/:id',controlerWishlist.getIdUser)
 };
-
