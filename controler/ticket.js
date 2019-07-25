@@ -7,7 +7,7 @@ exports.getTicket = (req, res) => {
     const query = req.query;
     let idTransaction = query.id_transaction;
     if (idTransaction) {
-        let sql = `SELECT * FROM data_ticket WHERE id_transaction = '${idTransaction}' LIMIT 1`;
+        let sql = `SELECT *,tour.id_tour as 'idtour' FROM data_ticket LEFT JOIN tour ON tour.id_tour = data_ticket.id_tour WHERE id_transaction = '${idTransaction}' LIMIT 1`;
         console.log(sql)
         connection.query(sql, function (error, data_ticket) {
             if (error) {
