@@ -111,7 +111,7 @@ exports.register = (req, res) => {
 
     if (name == '' && email == '' && password == '' && gender == '' && phone == '' ) {
         res.status(200);
-        res.json({status: false})
+        res.json({status: 'false'})
     } else {
         connection.query(
             `SELECT COUNT(email) AS total FROM users WHERE email=?`,
@@ -119,21 +119,21 @@ exports.register = (req, res) => {
             function (err, rows, field) {
                 if (err) {
                     res.status(200);
-                    res.json({status: false})
+                    res.json({status: 'false'})
                 } else {
                     let total = Math.ceil(rows[0].total);
                     if (total > 0) {
                         res.status(200);
-                        res.json({status: false})
+                        res.json({status: 'false'})
                     } else {
                         let hash = md5(password)
-                        connection.query(
-                            'INSERT INTO users SET email=?, phone=?, password=?, name=?, role="0", phone="0", address="", birthday="1970-01-01", gender=?, work="", photo="", points="0", token="0", json_access=""',
-                            [email,phone, hash, name, gender],
-                            function (err, rows, field) {
+                        let sql2= `INSERT INTO ekarcis.users (email, password, role, name, phone, gender) `+
+                            `VALUES ('${email}', '${hash}', '0', '${name}', '${phone}','${gender}')`;
+
+                        connection.query(sql2, function (err, rows, field) {
                                 if (err) {
                                     res.status(200);
-                                    res.json({status: false})
+                                    res.json({status: 'false'})
                                 } else {
                                     res.json({
                                         status: true,
