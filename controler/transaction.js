@@ -127,10 +127,15 @@ exports.getDataTransaction = (req,res)=>{
 
 exports.callbackPayment = (req, res)=>{
     console.log("Calback Payyment : ", req);
-    let id_transaction = req.query.id_transaction || '';
-    let status = req.query.status || '';
-    chackingTransaction(id_transaction, status);
-   // notifTransactionSuccess(id_transaction);
+
+    let trx_id = req.body.trx_id;
+    let status_code = req.body.status;
+    let via = req.body.via;
+    let id_transaction = req.body.sid;
+    let va = req.body.va;
+    if (status_code == 'berhasil'){
+        chackingTransaction(id_transaction, 'paid');
+    }
 
     response.success("ok", res)
 };
