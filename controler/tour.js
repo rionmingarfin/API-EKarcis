@@ -30,14 +30,14 @@ exports.getTour = (req, res) => {
     LEFT JOIN category ON tour.id_category=category.id 
     LEFT JOIN province ON tour.id_province = province.id
     LEFT JOIN photo ON tour.id_tour = photo.id_tour`
-     
+
     let search = req.query.search
     if (!isEmpty(search)) {
         let search = req.query.search;
         sql += ` WHERE tour LIKE '%${search}%'`;
         qountsql += ` WHERE tour LIKE '%${search}%'`;
     }
-    let sort =req.query.sort
+    let sort = req.query.sort
     if (!isEmpty(sort)) {
         let sort = req.query.sort;
         sql += ` ORDER BY tour ${sort}`;
@@ -57,7 +57,7 @@ exports.getTour = (req, res) => {
     return client.get(regisKey, (err, rows) => {
         if (rows) {
             res.send({
-                data: JSON.parse(rows)
+                data: JSON.parse(rows),
             })
             console.log('data', rows)
             // client.del(regisKey)
@@ -84,7 +84,13 @@ exports.getTour = (req, res) => {
                                     data: []
                                 })
                             } else {
-                                let data = client.setex(regisKey, 3600, JSON.stringify(rows))
+                                let data = client.setex(regisKey, 3600, JSON.stringify({
+                                    totalData: totalCount,
+                                    totalPage: totalPage,
+                                    limit: limit,
+                                    page: start,
+                                    rows, 
+                                }))
                                 console.log('setex', data)
                                 res.json({
                                     totalData: totalCount,
@@ -92,7 +98,7 @@ exports.getTour = (req, res) => {
                                     limit: limit,
                                     page: start,
                                     status: 200,
-                                    data: rows
+                                    data: rows,
                                 })
                             }
                         }
@@ -102,7 +108,7 @@ exports.getTour = (req, res) => {
             )
         }
     })
-    
+
 }
 
 exports.getTourId = (req, res) => {
@@ -159,7 +165,7 @@ exports.insert = (req, res) => {
 
     connection.query(
         'INSERT INTO tour SET id_admin=?,tour=?,addres=?,districts=?,description=?,latitude=?,longitude=?,cost=?,id_province=?,id_category=?',
-        [id_admin, tour, addres, districts,description, latitude, longitude, cost, id_province, id_category],
+        [id_admin, tour, addres, districts, description, latitude, longitude, cost, id_province, id_category],
         function (error, rows, field) {
             if (error) {
                 res.status(400).json('eror')
@@ -203,7 +209,7 @@ exports.insert = (req, res) => {
                                                                 id_admin: id_admin,
                                                                 tour: tour,
                                                                 addres: addres,
-                                                                districts :districts,
+                                                                districts: districts,
                                                                 description: description,
                                                                 latitude: latitude,
                                                                 longitude: longitude,
@@ -244,7 +250,7 @@ exports.update = (req, res) => {
 
     connection.query(
         `UPDATE tour SET id_admin=?,tour=?,addres=?,districts=?,description=?,latitude=?,longitude=?,cost=?,id_province=?,id_category=? WHERE id_tour=?`,
-        [id_admin, tour, addres,districts, description, latitude, longitude, cost, id_province, id_category, id],
+        [id_admin, tour, addres, districts, description, latitude, longitude, cost, id_province, id_category, id],
         function (error, rows, field) {
             if (error) {
                 res.status(400).json('eror pokonya')
@@ -274,7 +280,7 @@ exports.update = (req, res) => {
                                                 id_admin: id_admin,
                                                 tour: tour,
                                                 addres: addres,
-                                                districts :districts,
+                                                districts: districts,
                                                 description: description,
                                                 latitude: latitude,
                                                 longitude: longitude,
