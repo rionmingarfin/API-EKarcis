@@ -1,11 +1,14 @@
 'use strict'
 
-const Response = require('../response/response')
+const Response = require('..
+                         
+                         response/response')
 const connection = require('../database/connect')
 const isEmpty = require('lodash.isempty')
 const AWS = require('aws-sdk');
 const response = require("../response/response");
 const redis = require('redis');
+const {sendEmail} = require("../helper/sendEmail");
 const client = redis.createClient();
 const { sendSms } = require('../helper/sendSms');
 client.on('connect', function () {
@@ -15,7 +18,9 @@ client.on('connect', function () {
 client.on('error', function (err) {
     console.log('Something went wrong ' + err);
 });
+
 exports.welcome = (req, res) => {
+
     Response.success("Welcome", res)
 }
 
@@ -63,27 +68,44 @@ exports.getTour = (req, res) => {
             client.del(regisKey)
         } else {
             connection.query(qountsql, function (error, rows, field) {
-                if (error) {
-                    res.json({
-                        status: 200,
-                        data: []
-                    })
-                } else {
-                    totalCount = rows[0].totalCount;
-                    totalPage = Math.ceil(totalCount / limit);
-                    connection.query(sql, function (error, rows, field) {
-                        if (error) {
-                            res.json({
-                                status: 200,
-                                data: []
-                            })
-                        } else {
-                            if (rows.length === 0 || rows.length === '') {
+                    if (error) {
+                        res.json({
+                            status: 200,
+                            data: []
+                        })
+                    } else {
+                        totalCount = rows[0].totalCount;
+                        totalPage = Math.ceil(totalCount / limit);
+                        connection.query(sql, function (error, rows, field) {
+                            if (error) {
                                 res.json({
                                     status: 200,
                                     data: []
                                 })
                             } else {
+                                if (rows.length === 0 || rows.length === '') {
+                                    res.json({
+                                        status: 200,
+                                        data: []
+                                    })
+                                } else {
+                                    let data = client.setex(regisKey, 3600, JSON.stringify({
+                                        totalData: totalCount,
+                                        totalPage: totalPage,
+                                        limit: limit,
+                                        page: start,
+                                        rows,
+                                    }))
+                                    console.log('setex', data)
+                                    res.json({
+                                        totalData: totalCount,
+                                        totalPage: totalPage,
+                                        limit: limit,
+                                        page: start,
+                                        status: 200,
+                                        data: rows,
+                                    })
+                                }
                                 let data = client.setex(regisKey, 3600, JSON.stringify({
                                     totalData: totalCount,
                                     totalPage: totalPage,
@@ -100,11 +122,11 @@ exports.getTour = (req, res) => {
                                     status: 200,
                                     data: rows,
                                 })
+                              
                             }
-                        }
-                    })
+                        })
+                    }
                 }
-            }
             )
         }
     })
@@ -117,6 +139,7 @@ exports.getTourId = (req, res) => {
         Response.error('error', res, 404)
     } else {
         connection.query(
+                //`SELECT tour.id_tour AS id_tour,tour.id_admin AS id_admin,tour.tour AS tour,tour.addres AS addres,tour.districts AS districts,tour.description AS description,tour.latitude AS latitude,tour.longitude AS longitude,tour.cost AS cost, province.province AS province, tour.id_province AS id_province,category.id AS id_category,category.name AS name_category,photo.link AS photo
             `SELECT tour.id_tour AS id_tour,tour.id_admin AS id_admin,tour.tour AS tour,tour.addres AS addres,tour.districts AS districts,tour.description AS description,tour.status AS status,tour.opening_hours AS opening_hours,tour.closing_hours AS closing_hours,tour.latitude AS latitude,tour.longitude AS longitude,tour.cost AS cost, province.province AS province, tour.id_province AS id_province,category.id AS id_category,category.name AS name_category,photo.link AS photo
             FROM tour 
             LEFT JOIN category ON tour.id_category=category.id 
@@ -203,6 +226,7 @@ exports.insert = (req, res) => {
                                                     } else {
                                                         client.del('paket:rows')
                                                         let category = rowsCategory
+                                               
                                                         let province = rowsProvince
                                                         let data = {
                                                             status: 201,
