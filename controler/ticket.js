@@ -3,6 +3,7 @@
 const response = require('../response/response');
 const connection = require('../database/connect');
 const moment = require('moment');
+const {notifTransactionSuccess} = require("../helper/notifTransaction");
 exports.getTicket = (req, res) => {
     const query = req.query;
     let idTransaction = query.id_transaction;
@@ -54,18 +55,19 @@ exports.checkIn = (req, res) => {
     let ticket = req.query.ticket;
     if (ticket) {
         let sql1 = `SELECT * FROM ticket WHERE ticket='${ticket}' AND status='0'`;
-        connection.query(sql1, function (error, field) {
+        connection.query(sql1, function (error, dataTicket) {
             if (error) {
                 response.error("Search ticket error", res)
             } else {
-                if (field.length>0){
+                if (dataTicket.length>0){
                     let sql = `UPDATE ticket SET status='1' WHERE (ticket='${ticket}')`;
                     connection.query(sql, function (error, field) {
                         if (error){
                             response.error("checkin failed", res)
                         }else{
                             if (field.affectedRows>0){
-
+                                console.log(dataTicket)
+                                notifTransactionSuccess(dataTicket[0].id_transaction);
                                 response.success("checkin success", res)
                             }else {
                                 response.error("ticket not found", res)

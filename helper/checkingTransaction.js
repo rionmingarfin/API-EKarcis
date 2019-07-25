@@ -2,6 +2,7 @@
 
 const connection = require('../database/connect')
 const moment = require('moment');
+const {notifTransactionSuccess} = require("./notifTransaction");
 const {createTicket} = require("./createTicket");
 
 exports.chackingTransaction = (id_transaction, status) =>{
@@ -11,6 +12,7 @@ exports.chackingTransaction = (id_transaction, status) =>{
             return false;
         }else{
             if (transaction.changedRows>0){
+                notifTransactionSuccess(id_transaction);
                 let sql2 = 'SELECT * FROM transaction where id_transaction = "'+id_transaction+'"';
                 connection.query(sql2,function (err, dataTransaction) {
                     if (err){

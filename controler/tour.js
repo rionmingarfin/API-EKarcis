@@ -16,7 +16,7 @@ const {sendSms} = require('../helper/sendSms');
 //     console.log('Something went wrong ' + err);
 // });
 exports.welcome = (req, res) => {
-    Response.success(sendSms('6282329949292', 'sukses'), res)
+    Response.success("Welcome", res)
 }
 
 exports.getTour = (req, res) => {
