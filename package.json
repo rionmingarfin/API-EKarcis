@@ -19,7 +19,6 @@
     "express": "^4.17.1",
     "googleapis": "^41.0.0",
     "helmet": "^3.19.0",
-    "jsonwebtoken": "^8.5.1",
     "form-data": "^2.5.0",
     "jsonwebtoken": "^8.5.1",
     "lodash.isempty": "^4.4.0",
@@ -32,7 +31,6 @@
     "nodemailer": "^6.3.0",
     "redis": "^2.8.0",
     "serialize-javascript": "^1.7.0",
-    "superagent": "^5.1.0"
     "superagent": "^5.1.0",
     "x-xss-protection": "^1.2.0"
   }
