@@ -6,10 +6,6 @@ const isEmpty =require ('lodash.isempty')
 // const request =require('superagent')
 // const client =redis.createClient()
 
-exports.welcome = (req,res) =>{
-    Response.success('welcome',res)
-}
-
 exports.getAllCategory = (req,res)=> {
     connection.query(
         'SELECT * FROM category',

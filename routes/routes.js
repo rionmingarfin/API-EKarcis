@@ -16,7 +16,7 @@ module.exports = function (app) {
     const upload = multer();
 
     //welocome
-    app.get('/',controller.welcome)
+    app.get('/',controllerTour.welcome)
 
     //category
     app.get('/category',controller.getAllCategory)
@@ -65,7 +65,9 @@ module.exports = function (app) {
   
     //wisihlist
     app.post('/wishlist',controlerWishlist.wishlist)
+    app.get('/wishlist',controlerWishlist.getWishlist)
     app.get('/wishlist/:id',controlerWishlist.getIdUser)
+
 };
 
 function authJWT (req, res, next) {

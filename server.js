@@ -9,7 +9,6 @@ const Routes = require('./routes/routes')
 const cors =require('cors')
 const dateFormat = require('dateformat');
 const logger =  require('morgan');
-
 app.use(cors(), logger('dev'));
 
 app.use(

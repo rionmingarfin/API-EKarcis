@@ -8,6 +8,7 @@ const env = require('../config')
 const digit = Math.floor(100000 + Math.random() * 900000);
 const AWS = require('aws-sdk');
 const { sendEmail } = require('../helper/sendEmail')
+const moment = require('moment');
 
 // Get Users
 exports.getUserData = function (req, res) {
@@ -293,53 +294,84 @@ exports.update = (req, res) => {
     })
 
     let file = req.files[0];
-    const params = {
-        Bucket: 'e-tiketing',
-        Key: `${new Date().getTime()}-${file.originalname}`,
-        Body: req.files[0].buffer,
-        ACL: 'public-read',
-        ContentType: file.mimetype
-    };
     let id = req.params.id
     let name = req.body.name
     let phone = req.body.phone
     let address = req.body.address
     let gender = req.body.gender
-    let birthday = req.body.birthday
+    let birthday = moment(req.body.birthday).utc().format("YYYY-MM-DD HH:mm:ss");
     let work = req.body.work
-    s3.upload(params, function (err, data) {
-        if (err) {
-            Response.error('upload photo failed')
-        } else {
 
-            if (name == '' && phone == '' && address == '' && birthday == '' && gender == '' && work == '') {
-                Response.error('Data body cannot be Empty', res)
+    if (file){
+        console.log(file.originalname);
+        const params = {
+            Bucket: 'e-tiketing',
+            Key: `${new Date().getTime()}-${file.originalname}`,
+            Body: file.buffer,
+            ACL: 'public-read',
+            ContentType:  file.mimetype
+        };
+        s3.upload(params, function (err, data) {
+            if (err) {
+                Response.error('upload photo failed')
             } else {
-                connection.query(
-                    `UPDATE users SET name=?,phone=?,address=?,birthday=?,gender=?,work=?,photo='${data.Location}' WHERE id_user=?`,
-                    [name, phone, address, birthday, gender, work, id],
-                    function (error, rows, field) {
-                        if (error) {
-                            response.error('not found', res, 202)
-                        } else {
-                            let data = {
-                                status: 202,
-                                message: 'data sucefully update',
-                                result: {
-                                    id: parseInt(id),
-                                    name: name,
-                                    phone: phone,
-                                    address: address,
-                                    gender: gender,
-                                    birthday: birthday,
-                                    work: work
+
+                if (name == '' && phone == '' && address == '' && birthday == '' && gender == '' && work == '') {
+                    Response.error('Data body cannot be Empty', res)
+                } else {
+                    let sqlUpdate = `UPDATE users SET name='${name}',phone='${phone}',address='${address}',birthday='${birthday}',gender='${gender}',work='${work}',photo='${data.Location}' WHERE id_user='${id}'`;
+                    connection.query(sqlUpdate,
+                        function (error, rows, field) {
+                            if (error) {
+                                response.error('not found', res, 202)
+                            } else {
+                                let data = {
+                                    status: 202,
+                                    message: 'data sucefully update',
+                                    result: {
+                                        id: parseInt(id),
+                                        name: name,
+                                        phone: phone,
+                                        address: address,
+                                        gender: gender,
+                                        birthday: birthday,
+                                        work: work
+                                    }
                                 }
+                                return res.status(202).json(data).end();
                             }
-                            return res.status(202).json(data).end();
                         }
-                    }
-                )
+                    )
+                }
             }
+        })
+    }else {
+        if (name == '' && phone == '' && address == '' && birthday == '' && gender == '' && work == '') {
+            Response.error('Data body cannot be Empty', res)
+        } else {
+            let sqlUpdate = `UPDATE users SET name='${name}',phone='${phone}',address='${address}',birthday='${birthday}',gender='${gender}',work='${work}' WHERE id_user='${id}'`;
+            connection.query(sqlUpdate,
+                function (error, rows, field) {
+                    if (error) {
+                        response.error('not found', res, 202)
+                    } else {
+                        let data = {
+                            status: 202,
+                            message: 'data sucefully update',
+                            result: {
+                                id: parseInt(id),
+                                name: name,
+                                phone: phone,
+                                address: address,
+                                gender: gender,
+                                birthday: birthday,
+                                work: work
+                            }
+                        }
+                        return res.status(202).json(data).end();
+                    }
+                }
+            )
         }
-    })
+    }
 } 
