@@ -5,16 +5,16 @@ const connection = require('../database/connect')
 const isEmpty = require('lodash.isempty')
 const AWS = require('aws-sdk');
 const response = require("../response/response");
-// const redis = require('redis');
-// const client = redis.createClient();
+const redis = require('redis');
+const client = redis.createClient();
 const {sendSms} = require('../helper/sendSms');
-// client.on('connect', function () {
-//     console.log('Redis client connected');
-// });
-//
-// client.on('error', function (err) {
-//     console.log('Something went wrong ' + err);
-// });
+client.on('connect', function () {
+    console.log('Redis client connected');
+});
+
+client.on('error', function (err) {
+    console.log('Something went wrong ' + err);
+});
 exports.welcome = (req, res) => {
     Response.success("Welcome", res)
 }
@@ -60,7 +60,7 @@ exports.getTour = (req, res) => {
                 data: JSON.parse(rows),
             })
             console.log('data', rows)
-            // client.del(regisKey)
+            client.del(regisKey)
         } else {
             connection.query(qountsql, function (error, rows, field) {
                 if (error) {
