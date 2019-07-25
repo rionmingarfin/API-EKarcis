@@ -11,6 +11,7 @@ module.exports = function (app) {
     const controllerNotif =  require('../controler/notif');
     const controllerProvince =require('../controler/province')
     const controlerWishlist = require('../controler/wishlist')
+    const controlerReview = require('../controler/review')
 
     const multer = require('multer');
     const upload = multer();
@@ -25,7 +26,7 @@ module.exports = function (app) {
     app.delete('/category/:id',controller.delete)
   
     // Auth
-    app.get('/user/:id', authJWT, auth.getUserData)
+    app.get('/user/:id'/*, authJWT*/, auth.getUserData)
     app.post('/auth_login', auth.login)
     app.post('/auth_register', auth.register)
     app.post('/auth_forgot', auth.forgot)
@@ -68,6 +69,9 @@ module.exports = function (app) {
     app.get('/wishlist',controlerWishlist.getWishlist)
     app.get('/wishlist/:id',controlerWishlist.getIdUser)
 
+    //Review
+    app.post('/review',controlerReview.postReview);
+    app.get('/review/:id_tour',controlerReview.getReview);
 };
 
 function authJWT (req, res, next) {

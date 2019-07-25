@@ -15,9 +15,9 @@ exports.getUserData = function (req, res) {
 	let id_user = req.params.id
 	let validate = req.validate
 
-	if (validate === 0) {
-		res.status(200).json({ status: false})
-	} else {
+	// if (validate === 0) {
+	// 	res.status(200).json({ status: false})
+	// } else {
 		connection.query(
 			`SELECT email, name, phone, address, birthday, gender, work, photo, points FROM users WHERE id_user=?`,
 			[id_user], function (err, rows) {
@@ -32,7 +32,7 @@ exports.getUserData = function (req, res) {
 			}
 		)
 	}
-}
+// }
 
 // Login Function
 exports.login = function (req, res) {
