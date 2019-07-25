@@ -20,7 +20,7 @@ exports.chackingTransaction = (id_transaction, status) =>{
                             let id_user = dataTransaction[0].id_user;
                             let id_tour = dataTransaction[0].id_tour;
                             let name_booking = dataTransaction[0].name;
-                            let booking_date = dataTransaction[0].booking_date;
+                            let booking_date = moment(dataTransaction[0].booking_date).utc().format("YYYY-MM-DD HH:mm:ss");
                             let expaired_date = moment(booking_date).add(7,'days').utc().format("YYYY-MM-DD HH:mm:ss");
                             let ticket_amount = dataTransaction[0].ticket_amount;
                             createTicket(id_user,id_tour,id_transaction,name_booking,booking_date,expaired_date,ticket_amount);
