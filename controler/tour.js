@@ -60,7 +60,7 @@ exports.getTour = (req, res) => {
                 data: JSON.parse(rows),
             })
             console.log('data', rows)
-            // client.del(regisKey)
+            client.del(regisKey)
         } else {
             connection.query(qountsql, function (error, rows, field) {
                 if (error) {
