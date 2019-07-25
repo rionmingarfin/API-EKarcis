@@ -11,6 +11,26 @@ const OAuth2 = google.auth.OAuth2
 const digit = Math.floor(100000 + Math.random() * 900000);
 const AWS = require('aws-sdk');
 
+// Get Users
+exports.getUserData = function (req, res) {
+	let id_user = req.params.id
+	
+	connection.query(
+		`SELECT email, name, phone, address, birthday, gender, work, photo, points, json_access FROM users WHERE id_user=?`,
+		[id_user],
+		function (err, rows) {
+			if (err) {
+				res.status(200).json({ status: false })
+			} else {
+				res.json({
+					status: true,
+					result: rows
+				})
+			}
+		}
+	)
+}
+
 // Login Function
 exports.login = function (req, res) {
     let email = req.body.email;
@@ -110,7 +130,7 @@ exports.register = (req, res) => {
                     } else {
                         let hash = md5(password)
                         connection.query(
-                            'INSERT INTO users SET email=?, password=?, name=?, role="1", phone="0", address="", birthday="1970-01-01", gender=?, work="", photo="", points="0", token="0", json_access=""',
+                            'INSERT INTO users SET email=?, password=?, name=?, role="0", phone="0", address="", birthday="1970-01-01", gender=?, work="", photo="", points="0", token="0", json_access=""',
                             [email, hash, name, gender],
                             function (err, rows, field) {
                                 if (err) {
