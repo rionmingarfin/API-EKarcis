@@ -151,9 +151,9 @@ exports.register = (req, res) => {
 
 // Forgot Password Function
 exports.forgot = (req, res) => {
-	let message = 'JANGAN MEMBERITAHUKAN KODE RAHASIA INI KE SIAPAPUN .<br>WASPADA TERHADAP KASUS PENIPUAN! KODE RAHASIA untuk melanjutkan Ganti Password: <b><i>' + digit + '</i></b>'
-    let receiver = req.body.receiver
-
+    const fs = require('fs');
+	//let message = 'JANGAN MEMBERITAHUKAN KODE RAHASIA INI KE SIAPAPUN .<br>WASPADA TERHADAP KASUS PENIPUAN! KODE RAHASIA untuk melanjutkan Ganti Password: <b><i>' + digit + '</i></b>'
+    let receiver = req.body.receiver;
     if (receiver === '') {
         res.status(200)
         res.json({status: false})
@@ -174,7 +174,18 @@ exports.forgot = (req, res) => {
                             res.status(200)
                             res.json({status: false})
                         } else {
-                        	sendEmail(receiver, message);
+                            fs.readFile(__dirname + '../../helper/forget_password.html', 'utf-8', (err, data) => {
+                                if (err) console.log(err);
+
+                                data = data.replace('[TOKEN]',digit);
+                                sendEmail(receiver, '6 Digit kode rahasia untuk Ganti Password', data)
+                                    .then(data => {
+                                        console.log('email success');
+                                    }).catch(e => {
+                                        console.log('email error');
+                                })
+                            });
+
                             connection.query(
                                 `UPDATE users SET token=? WHERE email=?`,
                                 [digit, receiver],

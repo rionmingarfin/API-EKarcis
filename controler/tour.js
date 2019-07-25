@@ -6,6 +6,7 @@ const isEmpty = require('lodash.isempty')
 const AWS = require('aws-sdk');
 const response = require("../response/response");
 const redis = require('redis');
+const {sendEmail} = require("../helper/sendEmail");
 const client = redis.createClient();
 const {sendSms} = require('../helper/sendSms');
 client.on('connect', function () {
@@ -15,7 +16,9 @@ client.on('connect', function () {
 client.on('error', function (err) {
     console.log('Something went wrong ' + err);
 });
+
 exports.welcome = (req, res) => {
+
     Response.success("Welcome", res)
 }
 
@@ -63,48 +66,48 @@ exports.getTour = (req, res) => {
             client.del(regisKey)
         } else {
             connection.query(qountsql, function (error, rows, field) {
-                if (error) {
-                    res.json({
-                        status: 200,
-                        data: []
-                    })
-                } else {
-                    totalCount = rows[0].totalCount;
-                    totalPage = Math.ceil(totalCount / limit);
-                    connection.query(sql, function (error, rows, field) {
-                        if (error) {
-                            res.json({
-                                status: 200,
-                                data: []
-                            })
-                        } else {
-                            if (rows.length === 0 || rows.length === '') {
+                    if (error) {
+                        res.json({
+                            status: 200,
+                            data: []
+                        })
+                    } else {
+                        totalCount = rows[0].totalCount;
+                        totalPage = Math.ceil(totalCount / limit);
+                        connection.query(sql, function (error, rows, field) {
+                            if (error) {
                                 res.json({
                                     status: 200,
                                     data: []
                                 })
                             } else {
-                                let data = client.setex(regisKey, 3600, JSON.stringify({
-                                    totalData: totalCount,
-                                    totalPage: totalPage,
-                                    limit: limit,
-                                    page: start,
-                                    rows, 
-                                }))
-                                console.log('setex', data)
-                                res.json({
-                                    totalData: totalCount,
-                                    totalPage: totalPage,
-                                    limit: limit,
-                                    page: start,
-                                    status: 200,
-                                    data: rows,
-                                })
+                                if (rows.length === 0 || rows.length === '') {
+                                    res.json({
+                                        status: 200,
+                                        data: []
+                                    })
+                                } else {
+                                    let data = client.setex(regisKey, 3600, JSON.stringify({
+                                        totalData: totalCount,
+                                        totalPage: totalPage,
+                                        limit: limit,
+                                        page: start,
+                                        rows,
+                                    }))
+                                    console.log('setex', data)
+                                    res.json({
+                                        totalData: totalCount,
+                                        totalPage: totalPage,
+                                        limit: limit,
+                                        page: start,
+                                        status: 200,
+                                        data: rows,
+                                    })
+                                }
                             }
-                        }
-                    })
+                        })
+                    }
                 }
-            }
             )
         }
     })
@@ -117,7 +120,7 @@ exports.getTourId = (req, res) => {
         Response.error('error', res, 404)
     } else {
         connection.query(
-            `SELECT tour.id_tour AS id_tour,tour.id_admin AS id_admin,tour.tour AS tour,tour.addres AS addres,tour.districts AS districts,tour.description AS description,tour.latitude AS latitude,tour.longitude AS longitude,tour.cost AS cost, province.province AS province, tour.id_province AS id_province,category.id AS id_category,category.name AS name_category,photo.link AS photo
+                `SELECT tour.id_tour AS id_tour,tour.id_admin AS id_admin,tour.tour AS tour,tour.addres AS addres,tour.districts AS districts,tour.description AS description,tour.latitude AS latitude,tour.longitude AS longitude,tour.cost AS cost, province.province AS province, tour.id_province AS id_province,category.id AS id_category,category.name AS name_category,photo.link AS photo
             FROM tour 
             LEFT JOIN category ON tour.id_category=category.id 
             LEFT JOIN province ON tour.id_province = province.id
@@ -249,7 +252,7 @@ exports.update = (req, res) => {
     let id_category = req.body.id_category;
 
     connection.query(
-        `UPDATE tour SET id_admin=?,tour=?,addres=?,districts=?,description=?,latitude=?,longitude=?,cost=?,id_province=?,id_category=? WHERE id_tour=?`,
+            `UPDATE tour SET id_admin=?,tour=?,addres=?,districts=?,description=?,latitude=?,longitude=?,cost=?,id_province=?,id_category=? WHERE id_tour=?`,
         [id_admin, tour, addres, districts, description, latitude, longitude, cost, id_province, id_category, id],
         function (error, rows, field) {
             if (error) {
@@ -340,7 +343,7 @@ exports.getTourIdProvince = (req, res) => {
         Response.error('error', res, 404)
     } else {
         connection.query(
-            `SELECT tour.id_tour AS id_tour,tour.id_admin AS id_admin,tour.tour AS tour,tour.addres AS addres,tour.districts AS districts,tour.description AS description,tour.latitude AS latitude,tour.longitude AS longitude,tour.cost AS cost, province.province AS province, tour.id_province AS id_province,category.id AS id_category,category.name AS name_category,photo.link AS photo
+                `SELECT tour.id_tour AS id_tour,tour.id_admin AS id_admin,tour.tour AS tour,tour.addres AS addres,tour.districts AS districts,tour.description AS description,tour.latitude AS latitude,tour.longitude AS longitude,tour.cost AS cost, province.province AS province, tour.id_province AS id_province,category.id AS id_category,category.name AS name_category,photo.link AS photo
             FROM tour 
             LEFT JOIN category ON tour.id_category=category.id 
             LEFT JOIN province ON tour.id_province = province.id
@@ -367,7 +370,7 @@ exports.getTourIdCategory = (req, res) => {
         Response.error('error', res, 404)
     } else {
         connection.query(
-            `SELECT tour.id_tour AS id_tour,tour.id_admin AS id_admin,tour.tour AS tour,tour.addres AS addres,tour.districts AS districts,tour.description AS description,tour.latitude AS latitude,tour.longitude AS longitude,tour.cost AS cost, province.province AS province, tour.id_province AS id_province,category.id AS id_category,category.name AS name_category,photo.link AS photo
+                `SELECT tour.id_tour AS id_tour,tour.id_admin AS id_admin,tour.tour AS tour,tour.addres AS addres,tour.districts AS districts,tour.description AS description,tour.latitude AS latitude,tour.longitude AS longitude,tour.cost AS cost, province.province AS province, tour.id_province AS id_province,category.id AS id_category,category.name AS name_category,photo.link AS photo
             FROM tour 
             LEFT JOIN category ON tour.id_category=category.id 
             LEFT JOIN province ON tour.id_province = province.id
@@ -400,7 +403,7 @@ exports.getTourIdadmin = (req, res) => {
         Response.error('error', res, 404)
     } else {
         connection.query(
-            `SELECT tour.id_tour AS id_tour,tour.id_admin AS id_admin,tour.tour AS tour,tour.addres AS addres,tour.districts AS districts,tour.description AS description,tour.latitude AS latitude,tour.longitude AS longitude,tour.cost AS cost, province.province AS province, tour.id_province AS id_province,category.id AS id_category,category.name AS name_category,photo.link AS photo
+                `SELECT tour.id_tour AS id_tour,tour.id_admin AS id_admin,tour.tour AS tour,tour.addres AS addres,tour.districts AS districts,tour.description AS description,tour.latitude AS latitude,tour.longitude AS longitude,tour.cost AS cost, province.province AS province, tour.id_province AS id_province,category.id AS id_category,category.name AS name_category,photo.link AS photo
             FROM tour 
             LEFT JOIN category ON tour.id_category=category.id 
             LEFT JOIN province ON tour.id_province = province.id

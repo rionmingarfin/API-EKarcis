@@ -5,16 +5,16 @@ const { google } = require('googleapis')
 const OAuth2 = google.auth.OAuth2
 const env = require('../config')
 
-exports.sendEmail = async (email, message) => {
-    console.log(email);
+exports.sendEmail = async (email,subject, message) => {
+
     const oauth2Client = new OAuth2(
-        env.OAUTH_CLIENT_ID,
-        env.OAUTH_CLIENT_SECRET,
+        process.env.OAUTH_CLIENT_ID,
+        process.env.OAUTH_CLIENT_SECRET,
         "https://developers.google.com/oauthplayground"
     )
 
     oauth2Client.setCredentials({
-        refresh_token: env.OAUTH_REFRESH_TOKEN
+        refresh_token: process.env.OAUTH_REFRESH_TOKEN
     });
     const tokens = await oauth2Client.refreshAccessToken()
     const acessToken = tokens.credentials.access_token
@@ -23,10 +23,10 @@ exports.sendEmail = async (email, message) => {
         service: 'Gmail',
         auth: {
             type: "OAuth2",
-            user: env.SENDER_EMAIL,
-            clientId: env.OAUTH_CLIENT_ID,
-            clientSecret: env.OAUTH_CLIENT_SECRET,
-            refreshToken: env.OAUTH_REFRESH_TOKEN,
+            user: process.env.SENDER_EMAIL,
+            clientId: process.env.OAUTH_CLIENT_ID,
+            clientSecret: process.env.OAUTH_CLIENT_SECRET,
+            refreshToken: process.env.OAUTH_REFRESH_TOKEN,
             accessToken: acessToken
         }
     });
@@ -34,7 +34,7 @@ exports.sendEmail = async (email, message) => {
     const mailOptions = {
         from: env.SENDER_EMAIL,
         to: email,
-        subject: '6 Digit kode rahasia untuk Ganti Password',
+        subject: subject,
         generateTextFromHTML: true,
         html: message
     }
