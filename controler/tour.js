@@ -7,7 +7,7 @@ const AWS = require('aws-sdk');
 const response = require("../response/response");
 const redis = require('redis');
 const client = redis.createClient();
-const {sendSms} = require('../helper/sendSms');
+const { sendSms } = require('../helper/sendSms');
 client.on('connect', function () {
     console.log('Redis client connected');
 });
@@ -20,7 +20,7 @@ exports.welcome = (req, res) => {
 }
 
 exports.getTour = (req, res) => {
-    var sql = `SELECT tour.id_tour AS id_tour, tour.id_admin AS id_admin, tour.tour AS tour,tour.addres AS addres,tour.districts AS districts,tour.description AS description,tour.latitude AS latitude,tour.longitude AS longitude,tour.cost AS cost, province.province AS province, tour.id_province AS id_province,category.id AS id_category,category.name AS name_category,photo.link AS photo
+    var sql = `SELECT tour.id_tour AS id_tour, tour.id_admin AS id_admin, tour.tour AS tour,tour.addres AS addres,tour.districts AS districts,tour.description AS description,tour.status AS status,tour.opening_hours AS opening_hours,tour.closing_hours AS closing_hours,tour.latitude AS latitude,tour.longitude AS longitude,tour.cost AS cost, province.province AS province, tour.id_province AS id_province,category.id AS id_category,category.name AS name_category,photo.link AS photo
     FROM tour 
     LEFT JOIN category ON tour.id_category=category.id 
     LEFT JOIN province ON tour.id_province = province.id
@@ -89,7 +89,7 @@ exports.getTour = (req, res) => {
                                     totalPage: totalPage,
                                     limit: limit,
                                     page: start,
-                                    rows, 
+                                    rows,
                                 }))
                                 console.log('setex', data)
                                 res.json({
@@ -117,7 +117,7 @@ exports.getTourId = (req, res) => {
         Response.error('error', res, 404)
     } else {
         connection.query(
-            `SELECT tour.id_tour AS id_tour,tour.id_admin AS id_admin,tour.tour AS tour,tour.addres AS addres,tour.districts AS districts,tour.description AS description,tour.latitude AS latitude,tour.longitude AS longitude,tour.cost AS cost, province.province AS province, tour.id_province AS id_province,category.id AS id_category,category.name AS name_category,photo.link AS photo
+            `SELECT tour.id_tour AS id_tour,tour.id_admin AS id_admin,tour.tour AS tour,tour.addres AS addres,tour.districts AS districts,tour.description AS description,tour.status AS status,tour.opening_hours AS opening_hours,tour.closing_hours AS closing_hours,tour.latitude AS latitude,tour.longitude AS longitude,tour.cost AS cost, province.province AS province, tour.id_province AS id_province,category.id AS id_category,category.name AS name_category,photo.link AS photo
             FROM tour 
             LEFT JOIN category ON tour.id_category=category.id 
             LEFT JOIN province ON tour.id_province = province.id
@@ -157,6 +157,9 @@ exports.insert = (req, res) => {
     let addres = req.body.addres;
     let districts = req.body.districts;
     let description = req.body.description;
+    let status = req.body.status;
+    let opening_hours = req.body.opening_hours;
+    let closing_hours = req.body.closing_hours;
     let latitude = req.body.latitude;
     let longitude = req.body.longitude;
     let cost = req.body.cost;
@@ -164,8 +167,8 @@ exports.insert = (req, res) => {
     let id_category = req.body.id_category;
 
     connection.query(
-        'INSERT INTO tour SET id_admin=?,tour=?,addres=?,districts=?,description=?,latitude=?,longitude=?,cost=?,id_province=?,id_category=?',
-        [id_admin, tour, addres, districts, description, latitude, longitude, cost, id_province, id_category],
+        'INSERT INTO tour SET id_admin=?,tour=?,addres=?,districts=?,description=?,status=?,opening_hours=?,closing_hours=?,latitude=?,longitude=?,cost=?,id_province=?,id_category=?',
+        [id_admin, tour, addres, districts, description, status, opening_hours, closing_hours, latitude, longitude, cost, id_province, id_category],
         function (error, rows, field) {
             if (error) {
                 res.status(400).json('eror')
@@ -211,6 +214,9 @@ exports.insert = (req, res) => {
                                                                 addres: addres,
                                                                 districts: districts,
                                                                 description: description,
+                                                                status: status,
+                                                                opening_hours: opening_hours,
+                                                                closing_hours: closing_hours,
                                                                 latitude: latitude,
                                                                 longitude: longitude,
                                                                 cost: cost,
@@ -242,6 +248,9 @@ exports.update = (req, res) => {
     let addres = req.body.addres;
     let districts = req.body.districts;
     let description = req.body.description;
+    let status = req.body.status;
+    let opening_hours = req.body.opening_hours;
+    let closing_hours = req.body.closing_hours;
     let latitude = req.body.latitude;
     let longitude = req.body.longitude;
     let cost = req.body.cost;
@@ -249,8 +258,8 @@ exports.update = (req, res) => {
     let id_category = req.body.id_category;
 
     connection.query(
-        `UPDATE tour SET id_admin=?,tour=?,addres=?,districts=?,description=?,latitude=?,longitude=?,cost=?,id_province=?,id_category=? WHERE id_tour=?`,
-        [id_admin, tour, addres, districts, description, latitude, longitude, cost, id_province, id_category, id],
+        `UPDATE tour SET id_admin=?,tour=?,addres=?,districts=?,description=?,status=?,opening_hours=?,closing_hours=?,latitude=?,longitude=?,cost=?,id_province=?,id_category=? WHERE id_tour=?`,
+        [id_admin, tour, addres, districts, description, status, opening_hours, closing_hours, latitude, longitude, cost, id_province, id_category, id],
         function (error, rows, field) {
             if (error) {
                 res.status(400).json('eror pokonya')
@@ -282,6 +291,9 @@ exports.update = (req, res) => {
                                                 addres: addres,
                                                 districts: districts,
                                                 description: description,
+                                                status: status,
+                                                opening_hours: opening_hours,
+                                                closing_hours: closing_hours,
                                                 latitude: latitude,
                                                 longitude: longitude,
                                                 cost: cost,
@@ -340,7 +352,7 @@ exports.getTourIdProvince = (req, res) => {
         Response.error('error', res, 404)
     } else {
         connection.query(
-            `SELECT tour.id_tour AS id_tour,tour.id_admin AS id_admin,tour.tour AS tour,tour.addres AS addres,tour.districts AS districts,tour.description AS description,tour.latitude AS latitude,tour.longitude AS longitude,tour.cost AS cost, province.province AS province, tour.id_province AS id_province,category.id AS id_category,category.name AS name_category,photo.link AS photo
+            `SELECT tour.id_tour AS id_tour,tour.id_admin AS id_admin,tour.tour AS tour,tour.addres AS addres,tour.districts AS districts,tour.description AS description,tour.status AS status,tour.opening_hours AS opening_hours,tour.closing_hours AS closing_hours,tour.latitude AS latitude,tour.longitude AS longitude,tour.cost AS cost, province.province AS province, tour.id_province AS id_province,category.id AS id_category,category.name AS name_category,photo.link AS photo
             FROM tour 
             LEFT JOIN category ON tour.id_category=category.id 
             LEFT JOIN province ON tour.id_province = province.id
@@ -367,7 +379,7 @@ exports.getTourIdCategory = (req, res) => {
         Response.error('error', res, 404)
     } else {
         connection.query(
-            `SELECT tour.id_tour AS id_tour,tour.id_admin AS id_admin,tour.tour AS tour,tour.addres AS addres,tour.districts AS districts,tour.description AS description,tour.latitude AS latitude,tour.longitude AS longitude,tour.cost AS cost, province.province AS province, tour.id_province AS id_province,category.id AS id_category,category.name AS name_category,photo.link AS photo
+            `SELECT tour.id_tour AS id_tour,tour.id_admin AS id_admin,tour.tour AS tour,tour.addres AS addres,tour.districts AS districts,tour.description AS description,tour.status AS status,tour.opening_hours AS opening_hours,tour.closing_hours AS closing_hours,tour.latitude AS latitude,tour.longitude AS longitude,tour.cost AS cost, province.province AS province, tour.id_province AS id_province,category.id AS id_category,category.name AS name_category,photo.link AS photo
             FROM tour 
             LEFT JOIN category ON tour.id_category=category.id 
             LEFT JOIN province ON tour.id_province = province.id
@@ -400,7 +412,7 @@ exports.getTourIdadmin = (req, res) => {
         Response.error('error', res, 404)
     } else {
         connection.query(
-            `SELECT tour.id_tour AS id_tour,tour.id_admin AS id_admin,tour.tour AS tour,tour.addres AS addres,tour.districts AS districts,tour.description AS description,tour.latitude AS latitude,tour.longitude AS longitude,tour.cost AS cost, province.province AS province, tour.id_province AS id_province,category.id AS id_category,category.name AS name_category,photo.link AS photo
+            `SELECT tour.id_tour AS id_tour,tour.id_admin AS id_admin,tour.tour AS tour,tour.addres AS addres,tour.districts AS districts,tour.description AS description,tour.status AS status,tour.opening_hours AS opening_hours,tour.closing_hours AS closing_hours,tour.latitude AS latitude,tour.longitude AS longitude,tour.cost AS cost, province.province AS province, tour.id_province AS id_province,category.id AS id_category,category.name AS name_category,photo.link AS photo
             FROM tour 
             LEFT JOIN category ON tour.id_category=category.id 
             LEFT JOIN province ON tour.id_province = province.id
