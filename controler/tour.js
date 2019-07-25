@@ -1,8 +1,6 @@
 'use strict'
 
-const Response = require('..
-                         
-                         response/response')
+const Response = require('../response/response')
 const connection = require('../database/connect')
 const isEmpty = require('lodash.isempty')
 const AWS = require('aws-sdk');
