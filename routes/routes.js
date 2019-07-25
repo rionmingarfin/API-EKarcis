@@ -13,7 +13,7 @@ module.exports = function (app) {
     const upload = multer();
 
     //welocome
-    app.get('/',controller.welcome)
+    app.get('/',controllerTour.welcome)
 
     //category
     app.get('/category',controller.getAllCategory)
@@ -59,6 +59,6 @@ module.exports = function (app) {
     app.get('/checkin', controllerTicket.checkIn);
   
     //wisihlist
-    app.post('/wishlist',controlerWishlist.wishlist)
-    app.get('/wishlist/:id',controlerWishlist.getIdUser)
+    app.post('/wishlist',controlerWishlist.wishlist);
+    app.get('/wishlist/:id',controlerWishlist.getIdUser);
 };

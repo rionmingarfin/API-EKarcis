@@ -25,6 +25,7 @@ exports.getTicket = (req, res) => {
 };
 
 exports.createTicket = async (req, res) => {
+
     let id_user = req.body.id_user;
     let id_tour = req.body.id_tour;
     let id_transaction = req.body.id_transaction;
@@ -44,7 +45,6 @@ exports.createTicket = async (req, res) => {
             })
         }
     })
-
 
     response.success(amount, res);
 
