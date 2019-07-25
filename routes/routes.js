@@ -1,4 +1,6 @@
 'use strict'
+const jwt = require('jsonwebtoken')
+const connection = require('../database/connect')
 
 module.exports = function (app) {
     const controllerTransaction =require('../controler/transaction');
@@ -9,6 +11,7 @@ module.exports = function (app) {
     const controllerNotif =  require('../controler/notif');
     const controllerProvince =require('../controler/province')
     const controlerWishlist = require('../controler/wishlist')
+
     const multer = require('multer');
     const upload = multer();
 
@@ -22,13 +25,13 @@ module.exports = function (app) {
     app.delete('/category/:id',controller.delete)
   
     // Auth
-    app.get('/user/:id', auth.getUserData)
+    app.get('/user/:id', authJWT, auth.getUserData)
     app.post('/auth_login', auth.login)
     app.post('/auth_register', auth.register)
     app.post('/auth_forgot', auth.forgot)
     app.post('/auth_token_check/:id', auth.tokenCheck)
     app.post('/auth_password/:id', auth.password)
-    app.patch('/auth_register/:id',upload.any(), auth.update)
+    app.patch('/auth_register/:id', upload.any(), auth.update)
     
     //tour
     app.get('/tour',controllerTour.getTour)
@@ -63,4 +66,36 @@ module.exports = function (app) {
     //wisihlist
     app.post('/wishlist',controlerWishlist.wishlist)
     app.get('/wishlist/:id',controlerWishlist.getIdUser)
+};
+
+function authJWT (req, res, next) {
+	const auth_code = req.headers['auth'];
+	if (auth_code !== 'undefined') {
+		jwt.verify(auth_code, 'secretKey', (err) => {
+		if (err) {
+			res.status(200).json({ status: false })
+		}else{
+			connection.query(
+				`SELECT COUNT(json_access) AS total FROM users WHERE json_access=?`,
+				[auth_code], 
+				function (err, rows) {
+					if (err) {
+						res.status(200).json({ status: false })
+					} else {
+						let total = Math.ceil(rows[0].total);
+                    	if (total === 0) {
+                        	req.validate = 0
+                        	next();
+                        } else {
+                        	req.validate = 1
+                        	next();
+                        }
+					}
+				}
+			)
+		}
+	});
+	}else{
+		res.status(200).json({ status: false })
+	}
 };
