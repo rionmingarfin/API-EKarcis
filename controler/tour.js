@@ -102,41 +102,7 @@ exports.getTour = (req, res) => {
             )
         }
     })
-    // let regisKey = 'paket:rows'
-    // return client.get(regisKey, (err, rows) => {
-    //     if (rows) {
-    //         res.send({
-    //             data: JSON.parse(rows)
-    //         })
-    //         console.log('data', rows)
-    //         // client.del(regisKey)
-    //     } else {
-    //         connection.query(sql, function (error, rows, field) {
-    //             if (error) {
-    //                 res.status(404).json('error pokonya')
-    //             } else {
-    //                 if (rows.length === 0 || rows.length === '') {
-    //                     res.json({
-    //                         status: 200,
-    //                         data: []
-    //                     })
-    //                 } else {
-    //                     let data = client.setex(regisKey, 3600, JSON.stringify(rows))
-    //                     console.log('setex', data)
-    //                     res.json({
-    //                         totalData: totalCount,
-    //                         totalPage: totalPage,
-    //                         limit: limit,
-    //                         page: start,
-    //                         status: 200,
-    //                         data: rows
-    //                     })
-    //                         .send();
-    //                 }
-    //             }
-    //         })
-    //     }
-    // })
+    
 }
 
 exports.getTourId = (req, res) => {
