@@ -1,4 +1,5 @@
 'use strict'
+
 const response = require('../response/response')
 const connection = require('../database/connect')
 const isEmpty = require('lodash.isempty');
@@ -6,6 +7,8 @@ const FormData = require('form-data');
 const http = require('http');
 const moment = require('moment');
 const axios = require('axios');
+const {chackingTransaction} = require("../helper/checkingTransaction");
+const {notifTransactionTranfer, notifTransactionSuccess} = require('../helper/notifTransaction');
 
 exports.postTransaction = async (req, res) => {
     let id_user = req.body.id_user;
@@ -19,36 +22,37 @@ exports.postTransaction = async (req, res) => {
     let payment_method = req.body.payment_method;
     let numberId = `E-KARCIS-${moment(new Date()).format('MM')}-${new Date().getTime()}`;
     let paymentGateway = 'https://my.ipaymu.com/api/getbniva';
-    let va = '';
-    let displayName = '';
-    let payment_id = '';
-    console.log(req.body);
-    await axios.post(paymentGateway, {
-        key: process.env.IPAYMUapi_key,
-        price: total_price,
-        uniqid: numberId,
-        notify_url: 'http://52.27.82.154:7000/callback_payment'
-    })
-        .then(response => {
-            payment_id = response.data.id;
-            va = response.data.va;
-            displayName = response.data.displayName;
-        })
-        .catch(error => {
-            response.error("GET VA failed", res)
-        });
+    let va = '1';
+    let displayName = '2';
+    let payment_id = '3';
+    // await axios.post(paymentGateway, {
+    //     key: process.env.IPAYMUapi_key,
+    //     price: total_price,
+    //     uniqid: numberId,
+    //     notify_url: 'http://52.27.82.154:7000/callback_payment'
+    // })
+    //     .then(response => {
+    //         payment_id = response.data.id;
+    //         va = response.data.va;
+    //         displayName = response.data.displayName;
+    //     })
+    //     .catch(error => {
+    //         response.error("GET VA failed", res)
+    //     });
 
     let sql = `INSERT INTO ekarcis.transaction (id_transaction, id_user,name, id_tour, ticket_amount, coins_bonus, booking_date, deadline, payment_method,total_price,payment_id, va, payment_display_name, status) 
     VALUES ('${numberId}', '${id_user}','${name}', '${id_tour}', '${ticket_amount}', '${coin}', '${booking_date}', '${moment(date).add(2, 'days').utc().format("YYYY-MM-DD HH:mm:ss")}','${payment_method}','${total_price}','${payment_id}','${va}','${displayName}', 'unpaid')`;
-    console.log(sql);
     connection.query(sql, function (error, field) {
         if (error) {
             response.error("send transaction failed", res)
         } else {
-            connection.query("SELECT * FROM ekarcis.transaction WHERE id_transaction = ? ", [numberId], function (error, field) {
+            let sql3 = `SELECT *, transaction.id_user FROM ekarcis.transaction LEFT JOIN tour on transaction.id_tour = tour.id_tour LEFT JOIN photo ON tour.id_tour = photo.id_tour WHERE id_transaction = '${numberId}'`
+            console.log(sql3);
+            connection.query(sql3, function (error, field) {
                 if (error){
                     response.error("save transaction failed", res)
                 } else {
+                    notifTransactionTranfer(id_user,numberId, total_price,payment_method,va,displayName);
                     response.success(field, res);
                 }
             })
@@ -90,7 +94,8 @@ exports.getTransaction = (req, res, next) => {
 
 exports.getDataTransaction = (req,res)=>{
     const query = req.query;
-    let sql = ['SELECT * FROM transaction '];
+    let sql = ['SELECT  *, transaction.id_user '];
+    sql.push(' FROM transaction LEFT JOIN tour on transaction.id_tour = tour.id_tour  LEFT JOIN photo ON tour.id_tour = photo.id_tour ');
     let idUser = query.id_user || '';
     let idTour = query.id_tour || '';
     let idTransaction = query.id_transaction || '';
@@ -98,29 +103,39 @@ exports.getDataTransaction = (req,res)=>{
     let sort = query.sort;
 
         (idUser || idTour||idTransaction || status) && sql.push(" WHERE");
-    (idTransaction) && sql.push(" id_transaction = '"+idTransaction+"'");
-        (idTransaction && idUser) && sql.push(" AND");
-    (idUser) && sql.push(" id_user = "+idUser);
-        (idUser && status) && sql.push(" AND");
-    (status) && sql.push(" status = '"+status+"'");
-         (idTour && status) && sql.push(" AND");
-    (idTour) && sql.push(" id_tour = "+idTour);
 
+    (idTransaction) && sql.push(" transaction.id_transaction = '"+idTransaction+"'");
+        (idTransaction && idUser) && sql.push(" AND");
+    (idUser) && sql.push(" transaction.id_user = "+idUser);
+        (idUser && status) && sql.push(" AND");
+    (status) && sql.push(" transaction.status = '"+status+"'");
+         (idTour && status) && sql.push(" AND");
+    (idTour) && sql.push(" transaction.id_tour = "+idTour);
 
     sql.push(` ORDER BY transaction.booking_date ${sort||'ASC'}`);
-    let sqlNew = sql.join('')
+    let sqlNew = sql.join('');
     console.log(sqlNew);
     connection.query(sqlNew, function (error, field) {
         if (error){
             response.error("Transaction not found", res);
         }else {
-            response.success(field, res)
+            if (field.length>0){
+               response.success(field, res)
+            }else {
+                response.error("Get Transaction not found", res);    
+            }
         }
     })
 };
 
 exports.callbackPayment = (req, res)=>{
-    console.log("Calback Payyment : ", req);
+    //console.log("Calback Payyment : ", req);
+    let id_transaction = req.query.id_transaction || '';
+    let status = req.query.status || '';
+    chackingTransaction(id_transaction, status);
+   // notifTransactionSuccess(id_transaction);
+
     response.success("ok", res)
 };
+
 
