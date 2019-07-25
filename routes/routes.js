@@ -50,10 +50,14 @@ module.exports = function (app) {
     //Transaction
     app.post('/transaction', controllerTransaction.postTransaction);
     app.post('/gettransaction', controllerTransaction.getTransaction);
+    app.get('/get_data_transaction', controllerTransaction.getDataTransaction);
+    app.all('/callback_payment', controllerTransaction.callbackPayment);
 
     //Ticket
     app.get('/ticket', controllerTicket.getTicket);
-
+    app.post('/ticket', controllerTicket.createTicket);
+    app.get('/checkin', controllerTicket.checkIn);
+  
     //wisihlist
     app.post('/wishlist',controlerWishlist.wishlist)
     app.get('/wishlist/:id',controlerWishlist.getIdUser)

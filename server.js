@@ -19,8 +19,9 @@ app.use(
     function (req, res, next) {
         console.log("[LOG]");
         console.log(`\nTIME : ${dateFormat(new Date(), "yyyy-mm-dd h:MM:ss")} \nHOST : ${req.headers.host} \nURL : ${req.url} \nMETHOD : ${req.method} \nUser Agent : ${req.headers["useragent"]} \n`);
+        console.log("BODY : ",  req.body);
+        console.log("QUERY : ", req.query);
         next();
-
     },
 )
 app.use(bodyParser.json())

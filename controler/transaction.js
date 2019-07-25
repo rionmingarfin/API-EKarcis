@@ -19,24 +19,24 @@ exports.postTransaction = async (req, res) => {
     let payment_method = req.body.payment_method;
     let numberId = `E-KARCIS-${moment(new Date()).format('MM')}-${new Date().getTime()}`;
     let paymentGateway = 'https://my.ipaymu.com/api/getbniva';
-    let va = '1234567890';
-    let displayName = '12';
-    let payment_id = '12';
+    let va = '';
+    let displayName = '';
+    let payment_id = '';
     console.log(req.body);
-    // await axios.post(paymentGateway, {
-    //     key: process.env.IPAYMUapi_key,
-    //     price: 200,
-    //     uniqid: numberId,
-    //     notify_url: 'http://websiteanda.com/notify.php'
-    // })
-    //     .then(response => {
-    //         payment_id = response.data.id;
-    //         va = response.data.va;
-    //         displayName = response.data.displayName;
-    //     })
-    //     .catch(error => {
-    //         response.error("GET VA failed", res)
-    //     });
+    await axios.post(paymentGateway, {
+        key: process.env.IPAYMUapi_key,
+        price: total_price,
+        uniqid: numberId,
+        notify_url: 'http://52.27.82.154:7000/callback_payment'
+    })
+        .then(response => {
+            payment_id = response.data.id;
+            va = response.data.va;
+            displayName = response.data.displayName;
+        })
+        .catch(error => {
+            response.error("GET VA failed", res)
+        });
 
     let sql = `INSERT INTO ekarcis.transaction (id_transaction, id_user,name, id_tour, ticket_amount, coins_bonus, booking_date, deadline, payment_method,total_price,payment_id, va, payment_display_name, status) 
     VALUES ('${numberId}', '${id_user}','${name}', '${id_tour}', '${ticket_amount}', '${coin}', '${booking_date}', '${moment(date).add(2, 'days').utc().format("YYYY-MM-DD HH:mm:ss")}','${payment_method}','${total_price}','${payment_id}','${va}','${displayName}', 'unpaid')`;
@@ -65,7 +65,12 @@ exports.getTransaction = (req, res, next) => {
         if (error) {
             response.error("data user not found", res)
         } else {
-            let sql2 = "select * from tour where id_tour = " + id_tour;
+            let sql2= `SELECT tour.id_tour AS id_tour,tour.tour AS tour,tour.addres AS addres,tour.description AS description,tour.latitude AS latitude,tour.longitude AS longitude,tour.cost AS cost, province.province AS province, tour.id_province AS id_province,category.id AS id_category,category.name AS name_category,photo.link AS photo
+            FROM tour
+            LEFT JOIN category ON tour.id_category=category.id
+            LEFT JOIN province ON tour.id_province = province.id
+            LEFT JOIN photo ON tour.id_tour = photo.id_tour
+            WHERE tour.id_tour = ${id_tour}`;
             connection.query(sql2, function (error, tour) {
                 {
                     if (error) {
@@ -81,5 +86,41 @@ exports.getTransaction = (req, res, next) => {
         }
     })
 
-}
+};
+
+exports.getDataTransaction = (req,res)=>{
+    const query = req.query;
+    let sql = ['SELECT * FROM transaction '];
+    let idUser = query.id_user || '';
+    let idTour = query.id_tour || '';
+    let idTransaction = query.id_transaction || '';
+    let status = query.status || '';
+    let sort = query.sort;
+
+        (idUser || idTour||idTransaction || status) && sql.push(" WHERE");
+    (idTransaction) && sql.push(" id_transaction = '"+idTransaction+"'");
+        (idTransaction && idUser) && sql.push(" AND");
+    (idUser) && sql.push(" id_user = "+idUser);
+        (idUser && status) && sql.push(" AND");
+    (status) && sql.push(" status = '"+status+"'");
+         (idTour && status) && sql.push(" AND");
+    (idTour) && sql.push(" id_tour = "+idTour);
+
+
+    sql.push(` ORDER BY transaction.booking_date ${sort||'ASC'}`);
+    let sqlNew = sql.join('')
+    console.log(sqlNew);
+    connection.query(sqlNew, function (error, field) {
+        if (error){
+            response.error("Transaction not found", res);
+        }else {
+            response.success(field, res)
+        }
+    })
+};
+
+exports.callbackPayment = (req, res)=>{
+    console.log("Calback Payyment : ", req);
+    response.success("ok", res)
+};
 
