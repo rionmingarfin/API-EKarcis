@@ -96,3 +96,104 @@ exports.getIdUser = (req, res) => {
         )
     }
 }
+
+// exports.getWishlist = function(req, res){
+
+// 	const id_user 		= req.query.id_user || '';
+// 	const id_tour 	= parseInt(req.query.id_tour);
+
+// 	if(id_user==''){
+// 		connection.query(
+//             `SELECT wishlist.id, wishlist.id_user, wishlist.id_tour, users.name, users.phone, users.addres, users.birthday,users.gender 
+//             FROM wishlist
+// 			LEFT JOIN users ON wishlist.id_user = users.id_user 
+// 			WHERE wishlist.id_tour=${id_tour}`,
+// 			function(error, rows, field){
+// 				if(error){
+// 					console.log(error);
+// 				}else{
+// 					if(rows!=''){
+// 						return res.send({
+// 							data  : rows,
+// 						})		
+// 					}else{
+// 						return res.send({
+// 							message:'Data not found',
+// 						})
+// 					}
+
+// 				}
+// 			}
+// 		)
+// 	}else{
+// 		connection.query(
+// 			`SELECT wishlist.id, wishlist.id_user, wishlist.id_tour,tour.tour AS tour,tour.addres AS addres,tour.districts AS districts,tour.description AS description,tour.latitude AS latitude,tour.longitude AS longitude,tour.cost AS cost, province.province AS province, tour.id_province AS id_province,category.id AS id_category,category.name AS name_category,photo.link AS photo
+//             FROM wishlist 
+//             LEFT JOIN tour ON wishlist.id_tour = tour.id_tour
+//             LEFT JOIN category ON tour.id_category=category.id 
+//             LEFT JOIN province ON tour.id_province = province.id
+//             LEFT JOIN photo ON tour.id_tour = photo.id_tour 
+// 			LEFT JOIN users ON tour.id_tour = users.id_user 
+// 			WHERE wishlist.id_user=${id_user}`,
+// 			function(error, rows, field){
+// 				if(error){
+// 					console.log(error);
+// 				}else{
+// 					if(rows!=''){
+// 						return res.send({	
+// 							data  : rows,
+// 						})		
+// 					}else{
+// 						return res.send({
+// 							message:'Data not found',
+// 						})
+// 					}
+
+// 				}
+// 			}
+
+// 		)
+	
+// 	}	
+
+// }
+
+exports.getWishlist = function(req, res){
+	const id_user 		= req.query.id_user || '';
+	if(id_user==''){
+		res.json({
+            status :200,
+            data : []
+        })
+	}else{
+		connection.query(
+			`SELECT wishlist.id, wishlist.id_user, wishlist.id_tour,tour.tour AS tour,tour.addres AS addres,tour.districts AS districts,tour.description AS description,tour.latitude AS latitude,tour.longitude AS longitude,tour.cost AS cost, province.province AS province, tour.id_province AS id_province,category.id AS id_category,category.name AS name_category,photo.link AS photo
+            FROM wishlist 
+            LEFT JOIN tour ON wishlist.id_tour = tour.id_tour
+            LEFT JOIN category ON tour.id_category=category.id 
+            LEFT JOIN province ON tour.id_province = province.id
+            LEFT JOIN photo ON tour.id_tour = photo.id_tour 
+			LEFT JOIN users ON tour.id_tour = users.id_user 
+			WHERE wishlist.id_user=${id_user}`,
+			function(error, rows, field){
+				if(error){
+					console.log(error);
+				}else{
+					if(rows!=''){
+						return res.send({	
+							data  : rows,
+						})		
+					}else{
+						return res.send({
+							message:'Data not found',
+						})
+					}
+
+				}
+			}
+
+		)
+	
+	}	
+
+}
