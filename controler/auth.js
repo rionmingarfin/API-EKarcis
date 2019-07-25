@@ -69,6 +69,7 @@ exports.login = function (req, res) {
                                                     id_user: id_user,
                                                     role: role,
                                                     token: token
+
                                                 }]
                                             })
                                         }
