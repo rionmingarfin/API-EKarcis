@@ -16,7 +16,7 @@ client.on('error', function (err) {
     console.log('Something went wrong ' + err);
 });
 exports.welcome = (req, res) => {
-    Response.success(sendSms('6282329949292', 'sukses'), res)
+    Response.success("Welcome", res)
 }
 
 exports.getTour = (req, res) => {

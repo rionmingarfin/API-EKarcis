@@ -106,9 +106,10 @@ exports.register = (req, res) => {
     let name = req.body.name
     let email = req.body.email
     let password = req.body.password
+    let phone = req.body.phone
     let gender = req.body.gender
 
-    if (name == '' && email == '' && password == '' && gender == '') {
+    if (name == '' && email == '' && password == '' && gender == '' && phone == '' ) {
         res.status(200);
         res.json({status: false})
     } else {
@@ -127,8 +128,8 @@ exports.register = (req, res) => {
                     } else {
                         let hash = md5(password)
                         connection.query(
-                            `INSERT INTO users SET email=?, password=?, name=?, role="0", phone="0", address="", birthday="1970-01-01", gender=?, work="", photo="", points="0", token="0", json_access=""`,
-                            [email, hash, name, gender],
+                            'INSERT INTO users SET email=?, phone=?, password=?, name=?, role="0", phone="0", address="", birthday="1970-01-01", gender=?, work="", photo="", points="0", token="0", json_access=""',
+                            [email,phone, hash, name, gender],
                             function (err, rows, field) {
                                 if (err) {
                                     res.status(200);

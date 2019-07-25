@@ -22,23 +22,23 @@ exports.postTransaction = async (req, res) => {
     let payment_method = req.body.payment_method;
     let numberId = `E-KARCIS-${moment(new Date()).format('MM')}-${new Date().getTime()}`;
     let paymentGateway = 'https://my.ipaymu.com/api/getbniva';
-    let va = '1';
-    let displayName = '2';
-    let payment_id = '3';
-    // await axios.post(paymentGateway, {
-    //     key: process.env.IPAYMUapi_key,
-    //     price: total_price,
-    //     uniqid: numberId,
-    //     notify_url: 'http://52.27.82.154:7000/callback_payment'
-    // })
-    //     .then(response => {
-    //         payment_id = response.data.id;
-    //         va = response.data.va;
-    //         displayName = response.data.displayName;
-    //     })
-    //     .catch(error => {
-    //         response.error("GET VA failed", res)
-    //     });
+    let va = '';
+    let displayName = '';
+    let payment_id = '';
+    await axios.post(paymentGateway, {
+        key: process.env.IPAYMUapi_key,
+        price: total_price,
+        uniqid: numberId,
+        notify_url: 'http://52.27.82.154:7000/callback_payment'
+    })
+        .then(response => {
+            payment_id = response.data.id;
+            va = response.data.va;
+            displayName = response.data.displayName;
+        })
+        .catch(error => {
+            response.error("GET VA failed", res)
+        });
 
     let sql = `INSERT INTO ekarcis.transaction (id_transaction, id_user,name, id_tour, ticket_amount, coins_bonus, booking_date, deadline, payment_method,total_price,payment_id, va, payment_display_name, status) 
     VALUES ('${numberId}', '${id_user}','${name}', '${id_tour}', '${ticket_amount}', '${coin}', '${booking_date}', '${moment(date).add(2, 'days').utc().format("YYYY-MM-DD HH:mm:ss")}','${payment_method}','${total_price}','${payment_id}','${va}','${displayName}', 'unpaid')`;
@@ -69,10 +69,7 @@ exports.getTransaction = (req, res, next) => {
         if (error) {
             response.error("data user not found", res)
         } else {
-            let sql2= `SELECT tour.id_tour AS id_tour,tour.tour AS tour,tour.addres AS addres,tour.description AS description,tour.latitude AS latitude,tour.longitude AS longitude,tour.cost AS cost, province.province AS province, tour.id_province AS id_province,category.id AS id_category,category.name AS name_category,photo.link AS photo
-            FROM tour
-            LEFT JOIN category ON tour.id_category=category.id
-            LEFT JOIN province ON tour.id_province = province.id
+            let sql2= `SELECT * FROM tour
             LEFT JOIN photo ON tour.id_tour = photo.id_tour
             WHERE tour.id_tour = ${id_tour}`;
             connection.query(sql2, function (error, tour) {
@@ -129,7 +126,7 @@ exports.getDataTransaction = (req,res)=>{
 };
 
 exports.callbackPayment = (req, res)=>{
-    //console.log("Calback Payyment : ", req);
+    console.log("Calback Payyment : ", req);
     let id_transaction = req.query.id_transaction || '';
     let status = req.query.status || '';
     chackingTransaction(id_transaction, status);
