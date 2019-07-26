@@ -22,7 +22,8 @@ exports.notifTransactionTranfer = (idUser, idTransaction, total_price, payment_m
 
                 fs.readFile(__dirname + '../../helper/ticket_response.html', 'utf-8', (err, data) => {
                     if (err) console.log(err);
-                    data = data.replace('[NO_PESANAN]',idTransaction);
+
+                    data = data.replace('[NO_PESANAN}',idTransaction);
                     data = data.replace('[DATE]',moment(new Date()));
                     data = data.replace('[AMOUNT]',total_price);
                     data = data.replace('[BANK]',payment_method);
