@@ -1,6 +1,6 @@
 
 
-<h1 align="center">API-EKarcis</h1>
+<h1 align="center">API-EXtick</h1>
 
 <div align="center">
   <a href="#">
