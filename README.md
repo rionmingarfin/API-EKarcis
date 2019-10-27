@@ -1,6 +1,6 @@
 
 
-<h1 align="center">API-EKarcis</h1>
+<h1 align="center">API-EXtick</h1>
 
 <div align="center">
   <a href="#">
@@ -24,7 +24,7 @@
 <br>
 
 ## RELATED PROJECT
-express js (https://github.com/Lukm4nZ3r0/EKarcis.git)
+[React Native Project](https://github.com/Lukm4nZ3r0/EKarcis.git)
 
 ## Introduction
 This is a API-EKarcis backend with a RESTful API, here I Use node.js, express js, and mysql.
