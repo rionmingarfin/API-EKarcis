@@ -24,7 +24,7 @@
 <br>
 
 ## RELATED PROJECT
-express js (https://github.com/Lukm4nZ3r0/EKarcis.git)
+[React Native Project](https://github.com/Lukm4nZ3r0/EKarcis.git)
 
 ## Introduction
 This is a API-EKarcis backend with a RESTful API, here I Use node.js, express js, and mysql.
